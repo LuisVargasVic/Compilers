@@ -1,4 +1,4 @@
-#Run in terminal
+# Run in terminal
 ```
 $ lex lex-yacc.l
 $ yacc -d lex-yacc.y
