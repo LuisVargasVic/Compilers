@@ -1,0 +1,15 @@
+
+public class Token {
+	public String id;
+	public String type;
+	public Integer line;
+	public Integer initCharacter;
+	
+	public Token(String id, String type, Integer line, Integer initCharacter) {
+		super();
+		this.id = id;
+		this.type = type;
+		this.line = line;
+		this.initCharacter = initCharacter;
+	}
+}

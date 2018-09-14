@@ -1,0 +1,12 @@
+public class Error {
+	public String id;
+	public Integer position;
+	public Integer line;
+	
+	public Error(String id, Integer position, Integer line) {
+		super();
+		this.id = id;
+		this.position = position;
+		this.line = line;
+	}
+}

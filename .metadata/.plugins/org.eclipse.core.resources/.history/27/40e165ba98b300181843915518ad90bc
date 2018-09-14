@@ -1,0 +1,14 @@
+
+public class Error {
+	public char character;
+	public Integer line;
+	public Integer position;
+	
+	public Error(Character character, Integer line, Integer position) {
+		super();
+		this.character = character;
+		this.line = line;
+		this.position = position;
+	}
+
+}
