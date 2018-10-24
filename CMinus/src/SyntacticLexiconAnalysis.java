@@ -535,11 +535,11 @@ public class SyntacticLexiconAnalysis {
     	
     	FªV_ST_D, FªV_D, FªV_SCºA, FªV_A_O, FªV_A_N, FªV_A_C,
     	
-    	E_ST,  	 E_ST_E, 	E_OP, 	S_ST,  	 S_ST_E, S_OP,	I_ST,  I_ST_E,	I_OP,	R_ST,	R_ST_E,	R_OP,
-    	E_REL, 	 E_AD, 				S_REL, 	 S_AD,			I_REL, I_AD,			R_REL,	R_AD,
+    	E_ST,  	 E_ST_E, 	E_OP, 	S_ST,  	 S_ST_E, S_OP,	I_ST,	R_ST,
+    	E_REL, 	 E_AD, 				S_REL, 	 S_AD,			
     	E_R_AG5, E_R_AG_LT,			S_R_AG5, S_R_AG_LT,
-    	E_MA,  	 E_FT, 				S_MA,  	 S_FT,			I_MA,  I_FT,			R_MA,	R_FT, 
-    	E_AG5, 	 E_AG_LT,			S_AG5, 	 S_AG_LT,		I_AG5, I_AG_LT,			R_AG5,	R_AG_LT,
+    	E_MA,  	 E_FT, 				S_MA,  	 S_FT,			
+    	E_AG5, 	 E_AG_LT,			S_AG5, 	 S_AG_LT,		
     	E_E,						S_E,
     	
     	END;
@@ -630,13 +630,16 @@ public class SyntacticLexiconAnalysis {
     		E_ST.relational = E_AD;
     		E_ST.semicolon = FªV_ST_D; 
     		E_ST.openingParenthesis = E_AG_LT;
+    		E_ST.openingBrackets = E_AG_LT;
     		
     		E_ST_E.id = E_OP; 
     		E_ST_E.openingParenthesis = E_AG_LT;
+    		E_ST_E.openingBrackets = E_AG_LT;
     		
     		E_OP.semicolon = FªV_ST_D; 
     		E_OP.assignation = E_ST_E; 
-    		E_OP.openingParenthesis = E_AG5;
+    		E_OP.openingParenthesis = E_AG_LT;
+    		E_OP.openingBrackets = E_AG_LT;
     		
     		E_FT.id = E_MA; 						E_AD.id = E_REL;
     		E_FT.integer = E_MA; 					E_AD.integer = E_REL; 
@@ -648,6 +651,8 @@ public class SyntacticLexiconAnalysis {
     		E_MA.relational = E_AD; 		 	
     		E_MA.openingParenthesis = E_AG_LT;		E_REL.openingParenthesis = E_R_AG_LT;
     		E_MA.closingParenthesis = E_OP;			E_REL.closingParenthesis = E_OP;
+    		E_MA.openingBrackets = E_AG_LT;			E_REL.openingBrackets = E_R_AG_LT;
+    		E_MA.closingBrackets = E_AG5;			E_REL.closingBrackets = E_R_AG5;
     		E_MA.semicolon = FªV_ST_D;				E_REL.semicolon = FªV_ST_D;
     		
     		E_AG_LT.id = E_AG5; 					E_R_AG_LT.id = E_R_AG5;
@@ -662,6 +667,8 @@ public class SyntacticLexiconAnalysis {
     		E_AG5.relational = E_R_AG_LT; 
     		E_AG5.openingParenthesis = E_AG_LT;		E_R_AG5.openingParenthesis = E_AG_LT;
     		E_AG5.closingParenthesis = E_AG5;		E_R_AG5.closingParenthesis = E_AG5;
+    		E_AG5.openingBrackets = E_AG_LT;		E_R_AG5.openingBrackets = E_AG_LT;
+    		E_AG5.closingBrackets = E_AG5;			E_R_AG5.closingBrackets = E_AG5;
     		E_AG5.semicolon = FªV_ST_D;				E_R_AG5.semicolon = FªV_ST_D;
     		
     		E_E.id = E_ST; E_E.integer = E_ST;
@@ -676,8 +683,9 @@ public class SyntacticLexiconAnalysis {
     		S_OP.add = S_FT;
     		S_OP.mul = S_FT;
     		S_OP.relational = S_AD;
-    		S_OP.openingParenthesis = S_AG5;
+    		S_OP.openingParenthesis = S_AG_LT;
     		S_OP.closingParenthesis = ST;
+    		S_OP.openingBrackets = S_AG_LT;
     		
     		S_FT.id = S_MA; 						S_AD.id = S_REL;
     		S_FT.integer = S_MA; 					S_AD.integer = S_REL; 
@@ -689,6 +697,8 @@ public class SyntacticLexiconAnalysis {
     		S_MA.relational = S_AD; 		 	
     		S_MA.openingParenthesis = S_AG_LT;		S_REL.openingParenthesis = S_R_AG_LT;
     		S_MA.closingParenthesis = ST;			S_REL.closingParenthesis = ST;
+    		S_MA.openingBrackets = S_AG_LT;			S_REL.openingBrackets = S_R_AG_LT;
+    		S_MA.closingBrackets = S_AG5;			S_REL.closingBrackets = S_R_AG5;
     		
     		S_AG_LT.id = S_AG5; 					S_R_AG_LT.id = S_R_AG5;
     		S_AG_LT.integer = S_AG5; 				S_R_AG_LT.integer = S_R_AG5; 
@@ -702,6 +712,8 @@ public class SyntacticLexiconAnalysis {
     		S_AG5.relational = S_R_AG_LT; 
     		S_AG5.openingParenthesis = S_AG_LT;		S_R_AG5.openingParenthesis = S_AG_LT;
     		S_AG5.closingParenthesis = S_AG5;		S_R_AG5.closingParenthesis = S_AG5;
+    		S_AG5.openingBrackets = S_AG_LT;		S_R_AG5.openingBrackets = S_AG_LT;
+    		S_AG5.closingBrackets = S_AG5;			S_R_AG5.closingBrackets = S_AG5;
     		
     		S_E.id = S_ST; S_E.integer = S_ST;
     		
@@ -743,8 +755,8 @@ public class SyntacticLexiconAnalysis {
                 case "semicolon": 			return this.semicolon == null? ERROR: this.semicolon;
                 case "opening-parenthesis": return this.openingParenthesis == null? ERROR: this.openingParenthesis;
                 case "closing-parenthesis": return this.closingParenthesis == null? ERROR: this.closingParenthesis;
-                case "closing-brackets":	return this.openingBrackets == null? ERROR: this.openingBrackets;
-                case "opening-brackets":	return this.closingBrackets == null? ERROR: this.closingBrackets;
+                case "opening-bracket":		return this.openingBrackets == null? ERROR: this.openingBrackets;
+                case "closing-bracket":		return this.closingBrackets == null? ERROR: this.closingBrackets;
                 case "opening-keys": 		return this.openingKeys == null? ERROR: this.openingKeys;
                 case "closing-keys":		return this.closingKeys == null? ERROR: this.closingKeys;
                 case "add":					return this.add == null? ERROR: this.add;
@@ -840,8 +852,7 @@ public class SyntacticLexiconAnalysis {
     	for (int i = 0; i < tokens.size(); i++) {
     		knowMain++;
     		syntacticState = syntacticState.transition(tokens.get(i).type);
-    		System.out.println(syntacticState);
-    		System.out.println(tokens.get(i).id + " " + tokens.get(i).type);
+    		System.out.println(syntacticState + " " + tokens.get(i).id + " " + tokens.get(i).type);
     		if (syntacticState == SyntacticStates.ERROR && !isSyntaxError) {
     			System.out.println("--------------------------------------------------------");
     			System.out.println("Syntactic Error");
@@ -862,6 +873,11 @@ public class SyntacticLexiconAnalysis {
     		 */
     		if (tokens.get(i).type == "main") { hasMain = true; }
     	}	
+    	for (int i = 0; i < tokens.size(); i++) {
+        	if (tokens.get(i).type == "function") {
+        		System.out.println(tokens.get(i).id + " " + tokens.get(i).type);
+        	}
+        }
     	if (!hasMain && knowMain == tokens.size()) { printNoMain(); }
     	if (!tokens.isEmpty() && !isSyntaxError && balance && hasMain) { printSyntacticSymbolsTable(); }
     }
@@ -892,5 +908,6 @@ public class SyntacticLexiconAnalysis {
         	if (!tokens.isEmpty()) { printLexicSymbolsTable(); }
         	syntacticAnalysis();
         }   	
+        
     }	
 }
