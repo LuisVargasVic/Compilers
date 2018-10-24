@@ -26,22 +26,19 @@ public class SyntacticLexiconAnalysis {
         LexiconStates number;
         LexiconStates capital;
         LexiconStates space;
-        LexiconStates period;
         LexiconStates symbol;
         LexiconStates relational;
         LexiconStates equal;
         
     	static {
             // Initial state of the automata
-            Q0.space = Q0; Q0.letter = Q1; Q0.number = Q2; Q0.symbol = Q5; Q0.equal = Q6;  
+            Q0.space = Q0; Q0.letter = Q1; Q0.number = Q2; Q0.symbol = Q5; Q0.equal = Q6;  Q0.relational = Q8;
             
             // Word
-            Q1.space = Q0; Q1.letter = Q1; Q1.capital = Q1; Q1.number = Q1; Q1.symbol = Q5;
+            Q1.space = Q0; Q1.letter = Q1; Q1.capital = Q1; Q1.number = Q1; Q1.symbol = Q5; Q1.relational = Q8;
             
             // Number or Float
-            Q2.space = Q0; Q2.number = Q2; Q2.period = Q3;  Q2.symbol = Q5;
-            Q3.number = Q4;
-            Q4.space = Q0; Q4.number = Q4; Q4.symbol = Q5;
+            Q2.space = Q0; Q2.number = Q2;  Q2.symbol = Q5;
             
             // Symbol
             Q5.space = Q0; Q5.letter = Q1; Q5.symbol = Q5; Q5.number = Q2;
@@ -50,8 +47,8 @@ public class SyntacticLexiconAnalysis {
             Q6.space = Q0; Q6.equal = Q7;
             Q7.space = Q0; Q7.equal = Q0;
             
-            Q8.space = Q0; Q8.relational = Q9;
-            Q9.space = Q0; Q9.space = Q0; 
+            Q8.space = Q0; Q8.equal = Q9; 
+            Q9.space = Q0; Q9.relational = Q0; 
             
             ERROR.letter = ERROR; ERROR.equal = ERROR; ERROR.space = Q0;  ERROR.symbol = Q5;
         }
@@ -90,7 +87,6 @@ public class SyntacticLexiconAnalysis {
                 case "number":    return this.number == null? ERROR: this.number;
                 case "capLetter": return this.capital == null? ERROR: this.capital;
                 case "space":     return this.space == null? ERROR: this.space;
-                case "period":    return this.period == null? ERROR: this.period;
                 case "symbol":    return this.symbol == null? ERROR: this.symbol;
                 case "equal":     return this.equal == null? ERROR: this.equal;
                 case "relational":return this.relational == null? ERROR: this.relational;
@@ -282,9 +278,11 @@ public class SyntacticLexiconAnalysis {
     
     private static String checkId(String string) {
     	switch (string) {
-	        case "int": return "data-type";
-	        case "void": return "data-type";
+	        case "int": return "int";
+	        case "void": return "void";
+	        case "main": return "main";
 	        case "if": return "if";
+	        case "else": return "else";
 	        case "while": return "while";
 	        case "return": return "return";
 	        case ",": return "coma";
@@ -313,7 +311,7 @@ public class SyntacticLexiconAnalysis {
 	        	} else if (isNumber(string)) {
 	        		return "integer";
 	        	} else {
-	        		return "float";
+	        		return "null";
 	        	}
     	}
     }
@@ -372,12 +370,12 @@ public class SyntacticLexiconAnalysis {
             	 * it is sent to the id's stack
             	 */
             	toSyntax(str.charAt(i));
-            } else if (lexiconState == LexiconStates.Q6) { 
+            } else if (lexiconState == LexiconStates.Q6 || lexiconState == LexiconStates.Q8) { 
             	if (item.size() == 2) {
             		toSyntax();
             	}
             	item.add(str.charAt(i));
-            } else if (lexiconState == LexiconStates.Q7) { 
+            } else if (lexiconState == LexiconStates.Q7 || lexiconState == LexiconStates.Q9) { 
             	if (item.size() == 2) {
             		toSyntax();
             	} 
@@ -496,390 +494,231 @@ public class SyntacticLexiconAnalysis {
     
     private enum SyntacticStates {
     	ERROR,
-        FUNC_DATA, FUNC, FUNC_OPEN_P, FUNC_OPT_P_D, FUNC_OPEN_DATA, FUNC_VAR, FUNC_OPT_C_P, FUNC_OPEN_K, FUNC_OPT_K_D, 
-        FUNC_CLOSE_K,
-        
-    	DECLARATIONS_ID, DECLARATIONS_SEMICOLON, DECLARATIONS_OPT_D_O,
+    	PROGRAM,
     	
-    	OPERATIONS_OPT_I_OP, OPERATIONS_ASSIGNMENT, OPERATIONS, OPERATIONS_OPT_S_A_L, OPERATIONS_OPT_I_R, OPERATIONS_CP, 
-    	OPERATIONS_OPT_A_L_P, OPERATIONS_OPT_S_CP, OPERATIONS_FUNC_PC, OPERATIONS_R, OPERATIONS_S, OPERATIONS_ID,
+    	/** D = Declaration */
+    	/** F = Function */
+    	/** V = Variable */
+    	/** A = Array */
+    	/** N = Number */
+    	/** º = OR */
+    	/** ª = Inside */
+    	/** _ = Separation */
+    	/** O = Open */
+    	/** C = Close */
+    	/** T = Type */
+    	/** 5 = Multiple */
+    	/** P = Parameter */
+    	/** ST = Statement */
+    	/** C = Compound */
+    	/** L = Local */
+    	/** LT = List */
+    	/** E = Expression */
+    	/** S = Selection */
+    	/** I = Iteration */
+    	/** R = Return */
+    	/** ID = Id */
+    	/** VD = Void */
+    	/** SC = Semicolon */
+    	/** REL = Relational */
+    	/** MA = Multiplication and Add */
+    	/** FT = Term and Factor */
+    	/** AD = Additive */
+    	/** AG = Arguments */
+    	/** AT = Assign */
+    	/** OP = Options */
     	
-    	OPERATIONS_OPT_I_OP_A, OPERATIONS_OPT_A_P, OPERATIONS_I_A_CP, OPERATIONS_A_CP, OPERATIONS_OPT_S_CP_A, OPERATIONS_CP_A, 
-    	OPERATIONS_FUNC_PC_A,
+    	D_L, D, F_D, V_DºF_D, 
+    	V_D, V_A_O, V_A_N, V_A_C,
+    	T, P5, P5_LT, P, P5_ID, P5_A_ID, P5_A_C, P5_VD, 
+    	C_ST, L_D, ST_LT, ST,
     	
-    	OPERATIONS_OPT_I_OP_L, OPERATIONS_OPT_L_P, OPERATIONS_I_L_CP, OPERATIONS_L_CP, OPERATIONS_OPT_S_CP_L, OPERATIONS_CP_L, 
-    	OPERATIONS_FUNC_PC_L, OPERATIONS_B,
+    	FªV_ST_D, FªV_D, FªV_SCºA, FªV_A_O, FªV_A_N, FªV_A_C,
     	
-    	IF_OP, IF_ID, IF_CP, IF_OK, IF_OPT_OP_CK,
-    	WHILE_OP, WHILE_ID, WHILE_CP, WHILE_OK, WHILE_OPT_OP_CK,
-    	WHILE_IF_CLOSE_K,
-    	
-    	DENIAL_ID, DENIAL_SEMICOLON,
-    	
-    	RETURN_ID, RETURN_SEMICOLON,
-    	
-    	MAIN_OP, MAIN_CP, MAIN_OK, MAIN_OPT_K_D,
-    	
-    	M_DECLARATIONS_ID, M_DECLARATIONS_SEMICOLON, M_DECLARATIONS_OPT_D_O,
-    	
-    	M_OPERATIONS_OPT_I_OP, M_OPERATIONS_ASSIGNMENT, M_OPERATIONS, M_OPERATIONS_OPT_S_A_L, M_OPERATIONS_OPT_I_R, M_OPERATIONS_CP, 
-    	M_OPERATIONS_OPT_A_L_P, M_OPERATIONS_OPT_S_CP, M_OPERATIONS_FUNC_PC, M_OPERATIONS_R, M_OPERATIONS_S, M_OPERATIONS_ID,
-    	
-    	M_OPERATIONS_OPT_I_OP_A, M_OPERATIONS_OPT_A_P, M_OPERATIONS_I_A_CP, M_OPERATIONS_A_CP, M_OPERATIONS_OPT_S_CP_A, M_OPERATIONS_CP_A,
-    	M_OPERATIONS_FUNC_PC_A,
-    	
-    	M_OPERATIONS_OPT_I_OP_L, M_OPERATIONS_OPT_L_P, M_OPERATIONS_I_L_CP, M_OPERATIONS_L_CP, M_OPERATIONS_OPT_S_CP_L, M_OPERATIONS_CP_L,
-    	M_OPERATIONS_FUNC_PC_L, M_OPERATIONS_B,
-    	
-    	M_IF_OP, M_IF_ID, M_IF_CP, M_IF_OK, M_IF_OPT_OP_CK,
-    	M_WHILE_OP, M_WHILE_ID, M_WHILE_CP, M_WHILE_OK, M_WHILE_OPT_OP_CK,
-    	M_WHILE_IF_CLOSE_K,
-    	
-    	M_DENIAL_ID, M_DENIAL_SEMICOLON, 
+    	E_ST,  	 E_ST_E, 	E_OP, 	S_ST,  	 S_ST_E, S_OP,	I_ST,  I_ST_E,	I_OP,	R_ST,	R_ST_E,	R_OP,
+    	E_REL, 	 E_AD, 				S_REL, 	 S_AD,			I_REL, I_AD,			R_REL,	R_AD,
+    	E_R_AG5, E_R_AG_LT,			S_R_AG5, S_R_AG_LT,
+    	E_MA,  	 E_FT, 				S_MA,  	 S_FT,			I_MA,  I_FT,			R_MA,	R_FT, 
+    	E_AG5, 	 E_AG_LT,			S_AG5, 	 S_AG_LT,		I_AG5, I_AG_LT,			R_AG5,	R_AG_LT,
+    	E_E,						S_E,
     	
     	END;
     	
-    	SyntacticStates dataType;
+    	
+    	SyntacticStates _int;
+    	SyntacticStates _void;
     	SyntacticStates main;
     	SyntacticStates _if;
+    	SyntacticStates _else;
     	SyntacticStates _while;
     	SyntacticStates _return;
-        SyntacticStates _boolean;
         SyntacticStates coma;
         SyntacticStates semicolon;
         SyntacticStates openingParenthesis;
         SyntacticStates closingParenthesis;
         SyntacticStates openingKeys;
         SyntacticStates closingKeys;
-        SyntacticStates arithmetic;
-        SyntacticStates logical;
+        SyntacticStates openingBrackets;
+        SyntacticStates closingBrackets;
+        SyntacticStates add;
+        SyntacticStates mul;
         SyntacticStates relational;
         SyntacticStates assignation;
-        SyntacticStates denial;
         SyntacticStates integer;
-        SyntacticStates _float;
         SyntacticStates id;
         
         
     	static {
-    		/** Read main or initiation of function */
-    		FUNC_DATA.dataType = FUNC; 
-    		/** Read id of function or variable */
-    		FUNC.id = FUNC_OPEN_P; 
-    		/** Read '(' of function */
-    		FUNC_OPEN_P.openingParenthesis = FUNC_OPT_P_D; FUNC_OPEN_P.semicolon = FUNC_DATA; 
-    		/** Read ')' or new parameter data-type function */
-    		FUNC_OPT_P_D.dataType = FUNC_VAR; FUNC_OPT_P_D.closingParenthesis = FUNC_OPEN_K;
-    		/** Read new parameter data-type after ',' */
-    		FUNC_OPEN_DATA.dataType = FUNC_VAR;
-    		/** Read id of new parameter data-type function */
-    		FUNC_VAR.id = FUNC_OPT_C_P; 
-    		/** Read ',' or ')' function */
-    		FUNC_OPT_C_P.closingParenthesis = FUNC_OPEN_K; FUNC_OPT_C_P.coma = FUNC_OPEN_DATA;
-    		/** Read '{' function */
-    		FUNC_OPEN_K.openingKeys = FUNC_OPT_K_D;
-    		/** Read '}' to close function, data-type for new variable, return or id for new assignment */
-    		FUNC_OPT_K_D.dataType = DECLARATIONS_ID; FUNC_OPT_K_D._return = RETURN_ID; FUNC_OPT_K_D.id = OPERATIONS_ASSIGNMENT;
-    		
-    		// DECLARATIONS
-    		/** Read id for new variable */
-    		DECLARATIONS_ID.id = DECLARATIONS_SEMICOLON;
-    		/** Read ';' for new variable */
-    		DECLARATIONS_SEMICOLON.semicolon = DECLARATIONS_OPT_D_O;
-    		/** Read data-type for new variable, id for new assignment, if, while or return */
-    		DECLARATIONS_OPT_D_O.dataType = DECLARATIONS_ID; DECLARATIONS_OPT_D_O.id = OPERATIONS_ASSIGNMENT;
-    		DECLARATIONS_OPT_D_O._if = IF_OP; DECLARATIONS_OPT_D_O._while = WHILE_OP; DECLARATIONS_OPT_D_O._return = RETURN_ID;
-    		
-    		// OPERATIONS
-    		/** Read '=' for new variable */
-    		OPERATIONS_ASSIGNMENT.assignation = OPERATIONS;
-    		/** Read id, '(', '!', integer, float, boolean */
-    		OPERATIONS.id = OPERATIONS_ID; 
-    		OPERATIONS.openingParenthesis = OPERATIONS_OPT_I_OP; 
-    		OPERATIONS.denial = DENIAL_ID;
-    		OPERATIONS.integer = OPERATIONS_OPT_S_A_L; 
-    		OPERATIONS._float = OPERATIONS_OPT_S_A_L;
-    		OPERATIONS._boolean = OPERATIONS_B;
-    		/** Read ';' to end assignment, relational or arithmetic symbol */
-    		OPERATIONS_OPT_S_A_L.semicolon = OPERATIONS_OPT_I_R; 
-    		OPERATIONS_OPT_S_A_L.relational = OPERATIONS_R;
-    		OPERATIONS_OPT_S_A_L.arithmetic = OPERATIONS_OPT_I_OP_A;
-    		/** Read ';', '(', logical, relational or arithmetic symbol */
-    		OPERATIONS_ID.semicolon = OPERATIONS_OPT_I_R; 
-    		OPERATIONS_ID.arithmetic = OPERATIONS_OPT_I_OP_A;
-    		OPERATIONS_ID.logical = OPERATIONS_OPT_I_OP_L; 
-    		OPERATIONS_ID.openingParenthesis = OPERATIONS_FUNC_PC;
-    		OPERATIONS_ID.relational = OPERATIONS_R;
-    		/** Read ')' for ending functions */
-    		OPERATIONS_FUNC_PC.closingParenthesis = OPERATIONS_OPT_A_L_P;
-    		/** Read after '(' an id, '(', integer, float or boolean */
-    		OPERATIONS_OPT_I_OP.id = OPERATIONS_CP; 
-    		OPERATIONS_OPT_I_OP.openingParenthesis = OPERATIONS_OPT_I_OP;
-    		OPERATIONS_OPT_I_OP.integer = OPERATIONS_OPT_A_L_P; 
-    		OPERATIONS_OPT_I_OP._float = OPERATIONS_OPT_A_L_P;
-    		OPERATIONS_OPT_I_OP._boolean = OPERATIONS_CP_L;
-    		/** Read after ')' an ')', ';' or arithmetic symbol */
-    		OPERATIONS_OPT_A_L_P.arithmetic = OPERATIONS_I_A_CP; 
-    		OPERATIONS_OPT_A_L_P.closingParenthesis = OPERATIONS_OPT_S_CP;
-    		OPERATIONS_OPT_A_L_P.semicolon = OPERATIONS_OPT_I_R; 
-    		/** Read after ')' an ')', ';' or arithmetic symbol */
-    		OPERATIONS_OPT_S_CP.closingParenthesis = OPERATIONS_OPT_S_CP; 
-    		OPERATIONS_OPT_S_CP.semicolon = OPERATIONS_OPT_I_R; 
-    		OPERATIONS_OPT_S_CP.arithmetic = OPERATIONS_OPT_I_OP_A;
-    		/** Read after id an ')', ';', logical or arithmetic symbol */
-    		OPERATIONS_CP.closingParenthesis = OPERATIONS_OPT_S_CP; 
-    		OPERATIONS_CP.semicolon = OPERATIONS_OPT_I_R; 
-    		OPERATIONS_CP.openingParenthesis = OPERATIONS_FUNC_PC; 
-    		OPERATIONS_CP.arithmetic = OPERATIONS_I_A_CP;
-    		OPERATIONS_CP.logical = OPERATIONS_I_L_CP;
-    		
-    		// Relational
-    		
-    		OPERATIONS_R.integer = OPERATIONS_S; OPERATIONS_R._float = OPERATIONS_S;  OPERATIONS_R.id = OPERATIONS_S; 
-    		
-    		OPERATIONS_S.semicolon = OPERATIONS_OPT_I_R;
-    		
-    		// Arithmetic
-    		
-    		OPERATIONS_OPT_I_OP_A.id = OPERATIONS_CP_A; 
-    		OPERATIONS_OPT_I_OP_A.openingParenthesis = OPERATIONS_OPT_I_OP_A;
-    		OPERATIONS_OPT_I_OP_A.integer = OPERATIONS_OPT_A_P; 
-    		OPERATIONS_OPT_I_OP_A._float = OPERATIONS_OPT_A_P;
-    		
-    		OPERATIONS_OPT_A_P.arithmetic = OPERATIONS_I_A_CP; 
-    		OPERATIONS_OPT_A_P.closingParenthesis = OPERATIONS_OPT_S_CP_A;
-    		OPERATIONS_OPT_A_P.semicolon = OPERATIONS_OPT_I_R; 
-    		
-    		OPERATIONS_I_A_CP.id = OPERATIONS_CP_A; OPERATIONS_I_A_CP.integer = OPERATIONS_A_CP; OPERATIONS_I_A_CP._float = OPERATIONS_A_CP;
-
-    		OPERATIONS_A_CP.closingParenthesis = OPERATIONS_OPT_S_CP_A; 
-    		OPERATIONS_A_CP.semicolon = OPERATIONS_OPT_I_R; 
-    		OPERATIONS_A_CP.arithmetic = OPERATIONS_I_A_CP;
-    		
-    		OPERATIONS_OPT_S_CP_A.closingParenthesis = OPERATIONS_OPT_S_CP_A; 
-    		OPERATIONS_OPT_S_CP_A.semicolon = OPERATIONS_OPT_I_R; 
-    		OPERATIONS_OPT_S_CP_A.arithmetic = OPERATIONS_OPT_I_OP_A;
-    		
-    		OPERATIONS_CP_A.closingParenthesis = OPERATIONS_OPT_S_CP_A; 
-    		OPERATIONS_CP_A.semicolon = OPERATIONS_OPT_I_R; 
-    		OPERATIONS_CP_A.openingParenthesis = OPERATIONS_FUNC_PC_A; 
-    		OPERATIONS_CP_A.arithmetic = OPERATIONS_I_A_CP;
-
-    		OPERATIONS_FUNC_PC_A.closingParenthesis = OPERATIONS_OPT_A_P;
-    		
-    		// Logical 
-    		
-    		OPERATIONS_B.logical = OPERATIONS_I_L_CP;
-    		OPERATIONS_B.semicolon = OPERATIONS_OPT_I_R;
-    		
-    		OPERATIONS_OPT_I_OP_L.id = OPERATIONS_CP_L; 
-    		OPERATIONS_OPT_I_OP_L.openingParenthesis = OPERATIONS_OPT_I_OP_L;
-    		OPERATIONS_OPT_I_OP_L._boolean = OPERATIONS_OPT_L_P; 
-    		
-    		OPERATIONS_OPT_L_P.closingParenthesis = OPERATIONS_OPT_S_CP_L;
-    		OPERATIONS_OPT_L_P.logical = OPERATIONS_I_L_CP; 
-    		OPERATIONS_OPT_L_P.semicolon = OPERATIONS_OPT_I_R; 
-    		
-    		OPERATIONS_I_L_CP.id = OPERATIONS_CP_L; OPERATIONS_I_L_CP._boolean = OPERATIONS_L_CP;
-    		
-    		OPERATIONS_L_CP.closingParenthesis = OPERATIONS_OPT_S_CP_L; 
-    		OPERATIONS_L_CP.semicolon = OPERATIONS_OPT_I_R; 
-    		OPERATIONS_L_CP.logical = OPERATIONS_I_L_CP;
-	
-    		OPERATIONS_OPT_S_CP_L.closingParenthesis = OPERATIONS_OPT_S_CP_L; 
-    		OPERATIONS_OPT_S_CP_L.semicolon = OPERATIONS_OPT_I_R; 
-    		OPERATIONS_OPT_S_CP_L.logical = OPERATIONS_OPT_I_OP_L;
-    		
-    		OPERATIONS_CP_L.closingParenthesis = OPERATIONS_OPT_S_CP_L; 
-    		OPERATIONS_CP_L.semicolon = OPERATIONS_OPT_I_R; 
-    		OPERATIONS_CP_L.openingParenthesis = OPERATIONS_FUNC_PC_L;
-    		OPERATIONS_CP_L.logical = OPERATIONS_I_L_CP;
-
-    		OPERATIONS_FUNC_PC_L.closingParenthesis = OPERATIONS_OPT_L_P;
-    		
-    		IF_OP.openingParenthesis = IF_ID;
-    		IF_ID.id = IF_CP;
-    		IF_CP.closingParenthesis = IF_OK;
-    		IF_OK.openingKeys = IF_OPT_OP_CK;
-    		IF_OPT_OP_CK.closingKeys = OPERATIONS_OPT_I_R; IF_OPT_OP_CK.id = OPERATIONS_ASSIGNMENT; 
-    		IF_OPT_OP_CK._if = IF_OP; IF_OPT_OP_CK._while = WHILE_OP;
-    		
-    		WHILE_OP.openingParenthesis = WHILE_ID;
-    		WHILE_ID.id = WHILE_CP;
-    		WHILE_CP.closingParenthesis = WHILE_OK;
-    		WHILE_OK.openingKeys = WHILE_OPT_OP_CK;
-    		WHILE_OPT_OP_CK.closingKeys = OPERATIONS_OPT_I_R; WHILE_OPT_OP_CK.id = OPERATIONS_ASSIGNMENT; 
-    		WHILE_OPT_OP_CK._if = IF_OP; WHILE_OPT_OP_CK._while = WHILE_OP;
-    		
-    		DENIAL_ID.id = DENIAL_SEMICOLON;
-    		DENIAL_SEMICOLON.semicolon = OPERATIONS_OPT_I_R;
-    		
-    		OPERATIONS_OPT_I_R.id = OPERATIONS_ASSIGNMENT; OPERATIONS_OPT_I_R._if = IF_OP; OPERATIONS_OPT_I_R._while = WHILE_OP; 
-    		OPERATIONS_OPT_I_R._return = RETURN_ID; OPERATIONS_OPT_I_R.closingKeys = WHILE_IF_CLOSE_K;
-    		
-    		WHILE_IF_CLOSE_K.id = OPERATIONS_ASSIGNMENT; WHILE_IF_CLOSE_K._if = IF_OP; WHILE_IF_CLOSE_K._while = WHILE_OP; 
-    		WHILE_IF_CLOSE_K._return = RETURN_ID; WHILE_IF_CLOSE_K.closingKeys = OPERATIONS_OPT_I_R;
-    		
-    		// RETURN
-    		
-    		RETURN_ID.id = RETURN_SEMICOLON; RETURN_ID._boolean = RETURN_SEMICOLON; RETURN_ID.integer = RETURN_SEMICOLON; 
-    		RETURN_ID._float = RETURN_SEMICOLON;
-    		
-    		RETURN_SEMICOLON.semicolon = FUNC_CLOSE_K;
-    		
-    		FUNC_CLOSE_K.closingKeys = FUNC_DATA;
-    		
-    		// MAIN
-    		
-    		MAIN_OP.openingParenthesis = MAIN_CP;
-    		
-    		MAIN_CP.closingParenthesis = MAIN_OK;
-    		
-    		MAIN_OK.openingKeys = MAIN_OPT_K_D;
-    		
-    		MAIN_OPT_K_D.closingKeys = END; MAIN_OPT_K_D.dataType = M_DECLARATIONS_ID;
-    		
-    		
-    		// DECLARATIONS MAIN
-    		
-    		M_DECLARATIONS_ID.id = M_DECLARATIONS_SEMICOLON;
-    		
-    		M_DECLARATIONS_SEMICOLON.semicolon = M_DECLARATIONS_OPT_D_O;
-    		
-    		M_DECLARATIONS_OPT_D_O.dataType = M_DECLARATIONS_ID; M_DECLARATIONS_OPT_D_O.id = M_OPERATIONS_ASSIGNMENT;
-    		M_DECLARATIONS_OPT_D_O._if = M_IF_OP; M_DECLARATIONS_OPT_D_O._while = M_WHILE_OP; 
-    		
-    		// OPERATIONS MAIN
-    		
-    		M_OPERATIONS_ASSIGNMENT.assignation = M_OPERATIONS;
-    		
-    		M_OPERATIONS.id = M_OPERATIONS_ID; 
-    		M_OPERATIONS.openingParenthesis = M_OPERATIONS_OPT_I_OP; 
-    		M_OPERATIONS.denial = M_DENIAL_ID;
-    		M_OPERATIONS.integer = M_OPERATIONS_OPT_S_A_L; 
-    		M_OPERATIONS._float = M_OPERATIONS_OPT_S_A_L;
-    		M_OPERATIONS._boolean = M_OPERATIONS_B;
-    		
-    		M_OPERATIONS_OPT_S_A_L.semicolon = M_OPERATIONS_OPT_I_R; 
-    		M_OPERATIONS_OPT_S_A_L.relational = M_OPERATIONS_R;
-    		M_OPERATIONS_OPT_S_A_L.arithmetic = M_OPERATIONS_OPT_I_OP_A;
-    		
-    		M_OPERATIONS_ID.semicolon = M_OPERATIONS_OPT_I_R; 
-    		M_OPERATIONS_ID.arithmetic = M_OPERATIONS_OPT_I_OP_A;
-    		M_OPERATIONS_ID.logical = M_OPERATIONS_OPT_I_OP_L; 
-    		M_OPERATIONS_ID.openingParenthesis = M_OPERATIONS_FUNC_PC;
-    		M_OPERATIONS_ID.relational = M_OPERATIONS_R;
-    		
-    		M_OPERATIONS_FUNC_PC.closingParenthesis = M_OPERATIONS_OPT_A_L_P;
-    		
-    		M_OPERATIONS_OPT_I_OP.id = M_OPERATIONS_CP; 
-    		M_OPERATIONS_OPT_I_OP.openingParenthesis = M_OPERATIONS_OPT_I_OP;
-    		M_OPERATIONS_OPT_I_OP.integer = M_OPERATIONS_OPT_A_L_P; 
-    		M_OPERATIONS_OPT_I_OP._float = M_OPERATIONS_OPT_A_L_P;
-    		M_OPERATIONS_OPT_I_OP._boolean = M_OPERATIONS_CP_L;
-    		
-    		M_OPERATIONS_OPT_A_L_P.arithmetic = M_OPERATIONS_I_A_CP; 
-    		M_OPERATIONS_OPT_A_L_P.closingParenthesis = M_OPERATIONS_OPT_S_CP;
-    		M_OPERATIONS_OPT_A_L_P.semicolon = M_OPERATIONS_OPT_I_R; 
-    		    		
-    		M_OPERATIONS_OPT_S_CP.closingParenthesis = M_OPERATIONS_OPT_S_CP; 
-    		M_OPERATIONS_OPT_S_CP.semicolon = M_OPERATIONS_OPT_I_R; 
-    		M_OPERATIONS_OPT_S_CP.arithmetic = M_OPERATIONS_OPT_I_OP_A;
-    		
-    		M_OPERATIONS_CP.closingParenthesis = M_OPERATIONS_OPT_S_CP; 
-    		M_OPERATIONS_CP.semicolon = M_OPERATIONS_OPT_I_R; 
-    		M_OPERATIONS_CP.openingParenthesis = M_OPERATIONS_FUNC_PC; 
-    		M_OPERATIONS_CP.arithmetic = M_OPERATIONS_I_A_CP;
-    		M_OPERATIONS_CP.logical = M_OPERATIONS_I_L_CP;
-    		
-    		// Relational
-    		
-    		M_OPERATIONS_R.integer = M_OPERATIONS_S; M_OPERATIONS_R._float = M_OPERATIONS_S;  M_OPERATIONS_R.id = M_OPERATIONS_S; 
-    		
-    		M_OPERATIONS_S.semicolon = M_OPERATIONS_OPT_I_R;
-    		
-    		// Arithmetic
-    		
-    		M_OPERATIONS_OPT_I_OP_A.id = M_OPERATIONS_CP_A; 
-    		M_OPERATIONS_OPT_I_OP_A.openingParenthesis = M_OPERATIONS_OPT_I_OP_A;
-    		M_OPERATIONS_OPT_I_OP_A.integer = M_OPERATIONS_OPT_A_P; 
-    		M_OPERATIONS_OPT_I_OP_A._float = M_OPERATIONS_OPT_A_P;
-    		
-    		M_OPERATIONS_OPT_A_P.arithmetic = M_OPERATIONS_I_A_CP; 
-    		M_OPERATIONS_OPT_A_P.closingParenthesis = M_OPERATIONS_OPT_S_CP_A;
-    		M_OPERATIONS_OPT_A_P.semicolon = M_OPERATIONS_OPT_I_R; 
-    		
-    		M_OPERATIONS_I_A_CP.id = M_OPERATIONS_CP_A; M_OPERATIONS_I_A_CP.integer = M_OPERATIONS_A_CP; 
-    		M_OPERATIONS_I_A_CP._float = M_OPERATIONS_A_CP;
-
-    		M_OPERATIONS_A_CP.closingParenthesis = M_OPERATIONS_OPT_S_CP_A; 
-    		M_OPERATIONS_A_CP.semicolon = M_OPERATIONS_OPT_I_R; 
-    		M_OPERATIONS_A_CP.arithmetic = M_OPERATIONS_I_A_CP;
-    		
-    		M_OPERATIONS_OPT_S_CP_A.closingParenthesis = M_OPERATIONS_OPT_S_CP_A; 
-    		M_OPERATIONS_OPT_S_CP_A.semicolon = M_OPERATIONS_OPT_I_R; 
-    		M_OPERATIONS_OPT_S_CP_A.arithmetic = M_OPERATIONS_OPT_I_OP_A;
-    		
-    		M_OPERATIONS_CP_A.closingParenthesis = M_OPERATIONS_OPT_S_CP_A; 
-    		M_OPERATIONS_CP_A.semicolon = M_OPERATIONS_OPT_I_R; 
-    		M_OPERATIONS_CP_A.openingParenthesis = M_OPERATIONS_FUNC_PC_A; 
-    		M_OPERATIONS_CP_A.arithmetic = M_OPERATIONS_I_A_CP;
-
-    		M_OPERATIONS_FUNC_PC_A.closingParenthesis = M_OPERATIONS_OPT_A_P;
-    		
-    		// Logical 
-    		
-    		M_OPERATIONS_B.logical = M_OPERATIONS_I_L_CP;
-    		M_OPERATIONS_B.semicolon = M_OPERATIONS_OPT_I_R;
-    		
-    		M_OPERATIONS_OPT_I_OP_L.id = M_OPERATIONS_CP_L; 
-    		M_OPERATIONS_OPT_I_OP_L.openingParenthesis = M_OPERATIONS_OPT_I_OP_L;
-    		M_OPERATIONS_OPT_I_OP_L._boolean = M_OPERATIONS_OPT_L_P;
-    		
-    		M_OPERATIONS_OPT_L_P.closingParenthesis = M_OPERATIONS_OPT_S_CP_L;
-    		M_OPERATIONS_OPT_L_P.logical = M_OPERATIONS_I_L_CP; 
-    		M_OPERATIONS_OPT_L_P.semicolon = M_OPERATIONS_OPT_I_R; 
-    		
-    		M_OPERATIONS_I_L_CP.id = M_OPERATIONS_CP_L; M_OPERATIONS_I_L_CP._boolean = M_OPERATIONS_L_CP; 
-    		
-    		M_OPERATIONS_L_CP.closingParenthesis = M_OPERATIONS_OPT_S_CP_L; 
-    		M_OPERATIONS_L_CP.semicolon = M_OPERATIONS_OPT_I_R; 
-    		M_OPERATIONS_L_CP.logical = M_OPERATIONS_I_L_CP;
-	
-    		M_OPERATIONS_OPT_S_CP_L.closingParenthesis = M_OPERATIONS_OPT_S_CP_L; 
-    		M_OPERATIONS_OPT_S_CP_L.semicolon = M_OPERATIONS_OPT_I_R; 
-    		M_OPERATIONS_OPT_S_CP_L.logical = M_OPERATIONS_OPT_I_OP_L;
-    		
-    		M_OPERATIONS_CP_L.closingParenthesis = M_OPERATIONS_OPT_S_CP_L; 
-    		M_OPERATIONS_CP_L.semicolon = M_OPERATIONS_OPT_I_R; 
-    		M_OPERATIONS_CP_L.openingParenthesis = M_OPERATIONS_FUNC_PC_L;
-    		M_OPERATIONS_CP_L.logical = M_OPERATIONS_I_L_CP;
-    		
-    		M_OPERATIONS_FUNC_PC_L.closingParenthesis = M_OPERATIONS_OPT_L_P;
-    		
-    		M_IF_OP.openingParenthesis = M_IF_ID;
-    		M_IF_ID.id = M_IF_CP;
-    		M_IF_CP.closingParenthesis = M_IF_OK;
-    		M_IF_OK.openingKeys = M_IF_OPT_OP_CK;
-    		M_IF_OPT_OP_CK.closingKeys = M_OPERATIONS_OPT_I_R; M_IF_OPT_OP_CK.id = M_OPERATIONS_ASSIGNMENT; 
-    		M_IF_OPT_OP_CK._if = M_IF_OP; M_IF_OPT_OP_CK._while = M_WHILE_OP;
-    		
-    		M_WHILE_OP.openingParenthesis = M_WHILE_ID;
-    		M_WHILE_ID.id = M_WHILE_CP;
-    		M_WHILE_CP.closingParenthesis = M_WHILE_OK;
-    		M_WHILE_OK.openingKeys = M_WHILE_OPT_OP_CK;
-    		M_WHILE_OPT_OP_CK.closingKeys = M_OPERATIONS_OPT_I_R; M_WHILE_OPT_OP_CK.id = M_OPERATIONS_ASSIGNMENT; 
-    		M_WHILE_OPT_OP_CK._if = M_IF_OP; M_WHILE_OPT_OP_CK._while = M_WHILE_OP;
-    		
-    		M_DENIAL_ID.id = M_DENIAL_SEMICOLON;
-    		M_DENIAL_SEMICOLON.semicolon = M_OPERATIONS_OPT_I_R;
-    		
-    		M_OPERATIONS_OPT_I_R.id = M_OPERATIONS_ASSIGNMENT; M_OPERATIONS_OPT_I_R._if = M_IF_OP; M_OPERATIONS_OPT_I_R._while = M_WHILE_OP;
-    		M_OPERATIONS_OPT_I_R.closingKeys = END; M_OPERATIONS_OPT_I_R.closingKeys = M_WHILE_IF_CLOSE_K;
-    		
-    		M_WHILE_IF_CLOSE_K.id = M_OPERATIONS_ASSIGNMENT; M_WHILE_IF_CLOSE_K._if = IF_OP; M_WHILE_IF_CLOSE_K._while = M_WHILE_OP; 
-    		M_WHILE_IF_CLOSE_K.closingKeys = M_OPERATIONS_OPT_I_R;
-    		
+    		// TYPE
+    		PROGRAM._void = D; PROGRAM._int = D;
+    		D_L._void = D; D_L._int = D;
+    		
+    		// VARIABLE OR FUNCTION
+    		D.id = V_DºF_D; 
+    		
+    		V_DºF_D.semicolon = D_L; // TO DECLARATION LIST
+    		V_DºF_D.openingBrackets = V_A_O; // TO ARRAY OPENING
+    		// TO PARAMS
+    		V_DºF_D.openingParenthesis = P;
+    		
+    		V_A_O.integer = V_A_N;
+    		V_A_N.closingBrackets = V_A_C;
+    		V_A_C.semicolon = D_L;
+    		
+    		P._void = P5_VD;
+    		P._int = P5_ID; 
+    		 
+    		P5._int = P5_ID; 
+    		
+    		P5_ID.id = P5_A_ID; 
+    		P5_A_ID.openingBrackets = P5_A_C; 
+    		P5_A_ID.closingParenthesis = ST; 
+    		P5_A_ID.coma = P5;
+    		
+    		P5_A_C.closingBrackets = P5_LT;
+    		P5_LT.coma = P5; 
+    		P5_LT.closingParenthesis = ST;
+    		P5_VD.closingParenthesis = ST;
+    		
+    		ST.closingParenthesis = ST; 
+    		ST.openingKeys = FªV_ST_D;  
+    		ST._void = FªV_D; 
+    		ST._int = FªV_D;
+    		ST.integer = E_ST;
+    		ST.id = E_ST; 
+    		ST.openingParenthesis = E_FT;
+    		ST.closingKeys = FªV_ST_D;
+    		ST._if = S_ST; 
+    		ST._while = S_ST;
+    		ST._return = R_ST; 
+    		
+    		FªV_ST_D._void = FªV_D; 
+    		FªV_ST_D._int = FªV_D;
+    		FªV_ST_D.integer = E_ST;
+    		FªV_ST_D.id = E_ST; 
+    		FªV_ST_D.openingParenthesis = E_FT;
+    		FªV_ST_D.closingKeys = FªV_ST_D;
+    		FªV_ST_D._if = S_ST; 
+    		FªV_ST_D._while = S_ST;
+    		FªV_ST_D._else = ST;  
+    		FªV_ST_D._return = R_ST;  
+    		
+    		// For Expression statement
+    		E_ST.assignation = E_ST_E; 
+    		E_ST.mul = E_FT; 
+    		E_ST.add = E_FT; 
+    		E_ST.relational = E_AD;
+    		E_ST.semicolon = FªV_ST_D; 
+    		E_ST.openingParenthesis = E_AG_LT;
+    		
+    		E_ST_E.id = E_OP; 
+    		E_ST_E.openingParenthesis = E_AG_LT;
+    		
+    		E_OP.semicolon = FªV_ST_D; 
+    		E_OP.assignation = E_ST_E; 
+    		E_OP.openingParenthesis = E_AG5;
+    		
+    		E_FT.id = E_MA; 						E_AD.id = E_REL;
+    		E_FT.integer = E_MA; 					E_AD.integer = E_REL; 
+    		E_FT.openingParenthesis = E_E;			E_AD.openingParenthesis = E_E;
+    		E_FT._void = ST;
+    		
+    		E_MA.mul = E_FT;						E_REL.mul = E_AD;  
+    		E_MA.add = E_FT; 						E_REL.add = E_AD;										
+    		E_MA.relational = E_AD; 		 	
+    		E_MA.openingParenthesis = E_AG_LT;		E_REL.openingParenthesis = E_R_AG_LT;
+    		E_MA.closingParenthesis = E_OP;			E_REL.closingParenthesis = E_OP;
+    		E_MA.semicolon = FªV_ST_D;				E_REL.semicolon = FªV_ST_D;
+    		
+    		E_AG_LT.id = E_AG5; 					E_R_AG_LT.id = E_R_AG5;
+    		E_AG_LT.integer = E_AG5; 				E_R_AG_LT.integer = E_R_AG5; 
+    		E_AG_LT.openingParenthesis = E_E;		E_R_AG_LT.openingParenthesis = E_E;
+    		E_AG_LT.closingParenthesis = E_MA; 		E_R_AG_LT.closingParenthesis = E_REL;
+    		
+    		E_AG5.coma = E_AG_LT; 					E_R_AG5.coma = E_R_AG_LT; 
+    		E_AG5.assignation = E_AG_LT; 			E_R_AG5.assignation = E_R_AG_LT;
+    		E_AG5.mul = E_AG_LT; 					E_R_AG5.mul = E_R_AG_LT;
+    		E_AG5.add = E_AG_LT; 					E_R_AG5.add = E_R_AG_LT;										
+    		E_AG5.relational = E_R_AG_LT; 
+    		E_AG5.openingParenthesis = E_AG_LT;		E_R_AG5.openingParenthesis = E_AG_LT;
+    		E_AG5.closingParenthesis = E_AG5;		E_R_AG5.closingParenthesis = E_AG5;
+    		E_AG5.semicolon = FªV_ST_D;				E_R_AG5.semicolon = FªV_ST_D;
+    		
+    		E_E.id = E_ST; E_E.integer = E_ST;
+    		
+    		// For Selection statement
+    		S_ST.openingParenthesis = S_ST_E; 
+    		
+    		S_ST_E.id = S_OP; 
+    		S_ST_E.openingParenthesis = S_AG_LT;
+    		
+    		S_OP.assignation = S_ST_E; 
+    		S_OP.add = S_FT;
+    		S_OP.mul = S_FT;
+    		S_OP.relational = S_AD;
+    		S_OP.openingParenthesis = S_AG5;
+    		S_OP.closingParenthesis = ST;
+    		
+    		S_FT.id = S_MA; 						S_AD.id = S_REL;
+    		S_FT.integer = S_MA; 					S_AD.integer = S_REL; 
+    		S_FT.openingParenthesis = S_E;			S_AD.openingParenthesis = S_E;
+    		S_FT._void = ST;
+    		
+    		S_MA.mul = S_FT;						S_REL.mul = S_AD;  
+    		S_MA.add = S_FT; 						S_REL.add = S_AD;										
+    		S_MA.relational = S_AD; 		 	
+    		S_MA.openingParenthesis = S_AG_LT;		S_REL.openingParenthesis = S_R_AG_LT;
+    		S_MA.closingParenthesis = ST;			S_REL.closingParenthesis = ST;
+    		
+    		S_AG_LT.id = S_AG5; 					S_R_AG_LT.id = S_R_AG5;
+    		S_AG_LT.integer = S_AG5; 				S_R_AG_LT.integer = S_R_AG5; 
+    		S_AG_LT.openingParenthesis = S_E;		S_R_AG_LT.openingParenthesis = S_E;
+    		S_AG_LT.closingParenthesis = S_MA; 		S_R_AG_LT.closingParenthesis = S_REL;
+    		
+    		S_AG5.coma = S_AG_LT; 					S_R_AG5.coma = S_R_AG_LT; 
+    		S_AG5.assignation = S_AG_LT; 			S_R_AG5.assignation = S_R_AG_LT;
+    		S_AG5.mul = S_AG_LT; 					S_R_AG5.mul = S_R_AG_LT;
+    		S_AG5.add = S_AG_LT; 					S_R_AG5.add = S_R_AG_LT;										
+    		S_AG5.relational = S_R_AG_LT; 
+    		S_AG5.openingParenthesis = S_AG_LT;		S_R_AG5.openingParenthesis = S_AG_LT;
+    		S_AG5.closingParenthesis = S_AG5;		S_R_AG5.closingParenthesis = S_AG5;
+    		
+    		S_E.id = S_ST; S_E.integer = S_ST;
+    		
+    		// For Return statement
+    		R_ST.id = E_ST; 
+    		R_ST.integer = E_ST;
+    				
+    		// Variable declarations inside function
+    		FªV_D.id = FªV_SCºA; 
+    		FªV_D.main = FªV_SCºA;
+    		FªV_SCºA.semicolon = FªV_ST_D; 
+    		FªV_SCºA.openingParenthesis = E_FT;
+    		FªV_SCºA.openingBrackets = FªV_A_O;
+    		
+    		FªV_A_O.integer = FªV_A_N;
+    		FªV_A_N.closingBrackets = FªV_A_C;
+    		FªV_A_C.semicolon = FªV_ST_D;
     		
         }
 
@@ -893,26 +732,27 @@ public class SyntacticLexiconAnalysis {
     	 */
     	SyntacticStates transition(String st) {
             switch (st) {
-                case "data-type": 			return this.dataType == null? ERROR : this.dataType;
+                case "int": 				return this._int == null? ERROR : this._int;
+                case "void": 				return this._void == null? ERROR : this._void;
                 case "main":      			return this.main == null? ERROR: this.main;
                 case "if":       			return this._if == null? ERROR: this._if;
+                case "else":       			return this._else == null? ERROR: this._else;
                 case "while":     			return this._while == null? ERROR: this._while;
                 case "return":    			return this._return == null? ERROR: this._return;
-                case "boolean":   			return this._boolean == null? ERROR: this._boolean;
                 case "coma":      			return this.coma == null? ERROR: this.coma;
                 case "semicolon": 			return this.semicolon == null? ERROR: this.semicolon;
                 case "opening-parenthesis": return this.openingParenthesis == null? ERROR: this.openingParenthesis;
                 case "closing-parenthesis": return this.closingParenthesis == null? ERROR: this.closingParenthesis;
+                case "closing-brackets":	return this.openingBrackets == null? ERROR: this.openingBrackets;
+                case "opening-brackets":	return this.closingBrackets == null? ERROR: this.closingBrackets;
                 case "opening-keys": 		return this.openingKeys == null? ERROR: this.openingKeys;
                 case "closing-keys":		return this.closingKeys == null? ERROR: this.closingKeys;
-                case "arithmetic":			return this.arithmetic == null? ERROR: this.arithmetic;
-                case "logical":				return this.logical == null? ERROR: this.logical;
-                case "relational":				return this.relational == null? ERROR: this.relational;
+                case "add":					return this.add == null? ERROR: this.add;
+                case "mul":					return this.mul == null? ERROR: this.mul;
+                case "relational":			return this.relational == null? ERROR: this.relational;
                 case "assignation":			return this.assignation == null? ERROR: this.assignation;
                 case "integer":				return this.integer == null? ERROR: this.integer;
-                case "float":				return this._float == null? ERROR: this._float;
-                case "denial":				return this.denial == null? ERROR: this.denial;
-                case "identifier":					return this.id == null? ERROR: this.id;
+                case "identifier":			return this.id == null? ERROR: this.id;
                 default:					return ERROR;
             }
         }
@@ -926,128 +766,6 @@ public class SyntacticLexiconAnalysis {
      */
     public static Integer getError(SyntacticStates syntacticState) {
     	switch (syntacticState) {
-			case FUNC_DATA: 				return 1;
-			case FUNC:						return 2;
-			case FUNC_OPEN_P:				return 3;
-			case FUNC_OPT_P_D:				return 4;
-			case FUNC_OPEN_DATA:			return 5;
-			case FUNC_VAR:					return 6;
-			case FUNC_OPT_C_P:				return 7;
-			case FUNC_OPEN_K:				return 8;
-			case FUNC_CLOSE_K:				return 9;
-			case FUNC_OPT_K_D:				return 10;
-			
-			case DECLARATIONS_ID:			return 11;
-			case DECLARATIONS_SEMICOLON:	return 12;
-			case DECLARATIONS_OPT_D_O:		return 13;
-			
-			case OPERATIONS_OPT_I_OP:		return 14;
-			case OPERATIONS_ASSIGNMENT:		return 15;
-			case OPERATIONS:				return 16;
-			case OPERATIONS_OPT_S_A_L:		return 17;
-			case OPERATIONS_CP:				return 18;
-			case OPERATIONS_OPT_A_L_P:		return 19;
-			case OPERATIONS_OPT_S_CP:		return 20;
-			case OPERATIONS_FUNC_PC:		return 21;
-			case OPERATIONS_OPT_I_R:		return 22;
-			
-			case OPERATIONS_R:				return 23;
-			case OPERATIONS_S:				return 24;
-			case OPERATIONS_ID:				return 25;
-			
-			case OPERATIONS_OPT_I_OP_A:		return 26;
-			case OPERATIONS_OPT_A_P:		return 27;
-			case OPERATIONS_I_A_CP:			return 28;
-			case OPERATIONS_A_CP:			return 29;
-			case OPERATIONS_OPT_S_CP_A:		return 30;
-			case OPERATIONS_CP_A:			return 31;
-			case OPERATIONS_FUNC_PC_A:		return 32;
-			
-			case OPERATIONS_B:				return 33;
-			case OPERATIONS_OPT_I_OP_L:		return 34;
-			case OPERATIONS_OPT_L_P:		return 35;
-			case OPERATIONS_I_L_CP:			return 36;
-			case OPERATIONS_L_CP:			return 37;
-			case OPERATIONS_OPT_S_CP_L:		return 38;
-			case OPERATIONS_CP_L:			return 39;
-			case OPERATIONS_FUNC_PC_L:		return 40;
-			
-			case IF_OP:						return 41;
-			case IF_ID:						return 42;
-			case IF_CP:						return 43;
-			case IF_OK:						return 44;
-			case IF_OPT_OP_CK:				return 45;
-			
-			case WHILE_OP:					return 46;
-			case WHILE_ID:					return 47;
-			case WHILE_CP:					return 48;
-			case WHILE_OK:					return 49;
-			case WHILE_OPT_OP_CK:			return 50;
-			case WHILE_IF_CLOSE_K:			return 51;
-			
-			case DENIAL_ID:					return 52;
-			case DENIAL_SEMICOLON:			return 53;
-		
-			case RETURN_ID:					return 54;
-			case RETURN_SEMICOLON:			return 55;
-		
-			case MAIN_OP:					return 56;
-			case MAIN_CP:					return 57;
-			case MAIN_OK:					return 58;
-			case MAIN_OPT_K_D:				return 59;
-		
-			case M_DECLARATIONS_ID:			return 60;
-			case M_DECLARATIONS_SEMICOLON:	return 61;
-			case M_DECLARATIONS_OPT_D_O:	return 62;
-			
-			case M_OPERATIONS_OPT_I_OP:		return 63;
-			case M_OPERATIONS_ASSIGNMENT:	return 64;
-			case M_OPERATIONS:				return 65;
-			case M_OPERATIONS_OPT_S_A_L:	return 66;
-			case M_OPERATIONS_CP:			return 67;
-			case M_OPERATIONS_OPT_A_L_P:	return 68;
-			case M_OPERATIONS_OPT_S_CP:		return 69;
-			case M_OPERATIONS_FUNC_PC:		return 70;
-			case M_OPERATIONS_OPT_I_R:		return 71;
-			
-			case M_OPERATIONS_R:			return 72;
-			case M_OPERATIONS_S:			return 73;
-			case M_OPERATIONS_ID:			return 74;
-			
-			case M_OPERATIONS_OPT_I_OP_A:	return 75;
-			case M_OPERATIONS_OPT_A_P:		return 76;
-			case M_OPERATIONS_I_A_CP:		return 77;
-			case M_OPERATIONS_A_CP:			return 78;
-			case M_OPERATIONS_FUNC_PC_A:	return 79;
-			case M_OPERATIONS_OPT_S_CP_A:	return 80;
-			case M_OPERATIONS_CP_A:			return 81;
-		
-			case M_OPERATIONS_B:			return 82;
-			case M_OPERATIONS_OPT_I_OP_L:	return 83;
-			case M_OPERATIONS_OPT_L_P:		return 84;
-			case M_OPERATIONS_I_L_CP:		return 85;
-			case M_OPERATIONS_L_CP:			return 86;
-			case M_OPERATIONS_OPT_S_CP_L:	return 87;
-			case M_OPERATIONS_CP_L:			return 88;
-			case M_OPERATIONS_FUNC_PC_L:	return 89;
-			
-			case M_IF_OP:					return 90;
-			case M_IF_ID:					return 91;
-			case M_IF_CP:					return 92;
-			case M_IF_OK:					return 93;
-			case M_IF_OPT_OP_CK:			return 94;
-			
-			case M_WHILE_OP:				return 94;
-			case M_WHILE_ID:				return 95;
-			case M_WHILE_CP:				return 96;
-			case M_WHILE_OK:				return 97;
-			case M_WHILE_OPT_OP_CK:			return 98;
-			case M_WHILE_IF_CLOSE_K:		return 99;
-			
-			case M_DENIAL_ID:				return 100;
-			case M_DENIAL_SEMICOLON:		return 101;
-			
-			case ERROR:						return 102;
 			default:						return 0;
 		}
     }
@@ -1059,311 +777,8 @@ public class SyntacticLexiconAnalysis {
      */
     public static void printError(Integer position) {
     	switch (position) {
-			case 1:// FUNC_DATA
-				System.out.println("Error type: It was expected a data-type");
-				break;
-			case 2: // FUNC
-				System.out.println("Error type: It was expected a function");
-				break;
-			case 3: // FUNC_OPEN_P
-				System.out.println("Error type: It was expected a '('");
-				break;
-			case 4: // FUNC_OPT_P_D
-				System.out.println("Error type: It was expected a data-type or ')'");
-				break;
-			case 5: // FUNC_OPEN_DATA
-				System.out.println("Error type: It was expected a data-type");
-				break;
-			case 6: // FUNC_VAR
-				System.out.println("Error type: It was expected a variable");
-				break;
-			case 7: // FUNC_OPT_C_P
-				System.out.println("Error type: It was expected a ',' or ')'");
-				break;
-			case 8: // FUNC_OPEN_K
-				System.out.println("Error type: It was expected a '{'");
-				break;
-			case 9: // FUNC_CLOSE_K
-				System.out.println("Error Type: It's the end of the function it should be expected '{'");
-				break;
-			case 10: // FUNC_OPT_K_D
-				System.out.println("Error Type: It's expected a variable, if or while, data-type for a new variable or return");
-				break;
-			case 11: // DECLARATIONS_ID
-				System.out.println("Error type: It was expected an id for a new variable");
-				break;
-			case 12: // DECLARATIONS_SEMICOLON
-				System.out.println("Error type: It was expected a ';' for a new variable");
-				break;
-			case 13: // DECLARATIONS_OPT_D_O
-				System.out.println("Error type: It was expected a variable, if or while, data-type for a new variable or return");
-				break;
-			case 14: // OPERATIONS_OPT_I_OP
-				System.out.println("Error type: It was expected a variable, integer or float");
-				break;
-			case 15: // OPERATIONS_ASSIGNMENT
-				System.out.println("Error type: It was expected a '='");
-				break;
-			case 16: // OPERATIONS
-				System.out.println("Error type: It was expected a '!', '(', variable, function, integer or float, boolean");
-				break;
-			case 17: // OPERATIONS_OPT_S_A_L
-				System.out.println("Error type: It was expected a ';', relational symbol, logical symbol or arithmetic symbol");
-				break;
-			case 18: // OPERATIONS_CP
-				System.out.println("Error type: It was expected a ';', '(', ')', arithmetic symbol or logical symbol");
-				break;
-			case 19: // OPERATIONS_OPT_A_L_P
-				System.out.println("Error type: It was expected a ';', ')', arithmetic symbol or logical symbol");
-				break;
-			case 20: // OPERATIONS_OPT_S_CP
-				System.out.println("Error type: It was expected a ';', ')', arithmetic symbol or logical symbol");
-				break;
-			case 21: // OPERATIONS_FUNC_PC
-				System.out.println("Error type: It was expected a ')'");
-				break;
-			case 22: // OPERATIONS_OPT_I_R
-				System.out.println("Error Type: It was expected a variable, if, while, return");
-				break;
-			case 23: // OPERATIONS_R
-				System.out.println("Error Type: It was expected a variable, float or integer");
-				break;
-			case 24: // OPERATIONS_S
-				System.out.println("Error Type: It was expected a ';'");
-				break;
-			case 25: // OPERATIONS_ID
-				System.out.println("Error type: It was expected a ';', ')', relational symbol, arithmetic symbol or logical symbol");
-				break;
-			case 26: // OPERATIONS_OPT_I_OP_A
-				System.out.println("Error type: It was expected a '(', variable, function, integer or float");
-				break;
-			case 27: // OPERATIONS_OPT_A_P
-				System.out.println("Error type: It was expected a ';', ')', arithmetic symbol");
-				break;
-			case 28: // OPERATIONS_I_A_CP
-				System.out.println("Error type: It was expected a variable, function, integer or float");
-				break;
-			case 29: // OPERATIONS_A_CP
-				System.out.println("Error type: It was expected a ')', ';' or arithmetic symbol");
-				break;
-			case 30: // OPERATIONS_OPT_S_CP_A
-				System.out.println("Error type: It was expected a ')', ';' or arithmetic symbol");
-				break;
-			case 31: // OPERATIONS_CP_A
-				System.out.println("Error type: It was expected a '(', ')', ';' or arithmetic symbol");
-				break;
-			case 32: // OPERATIONS_FUNC_PC_A
-				System.out.println("Error type: It was expected a ')'");
-				break;
-			case 33: // OPERATIONS_B
-				System.out.println("Error type: It was expected a logical symbol or ';'");
-				break;
-			case 34: // OPERATIONS_OPT_I_OP_L
-				System.out.println("Error type: It was expected a '(', variable, boolean");
-				break;
-			case 35: // OPERATIONS_OPT_L_P
-				System.out.println("Error type: It was expected a ';', ')', logical symbol");
-				break;
-			case 36: // OPERATIONS_I_L_CP
-				System.out.println("Error type: It was expected a variable, function, boolean");
-				break;
-			case 37: // OPERATIONS_L_CP
-				System.out.println("Error type: It was expected a ')', ';' or logical symbol");
-				break;
-			case 38: // OPERATIONS_OPT_S_CP_L
-				System.out.println("Error type: It was expected a ')', ';' or logical symbol");
-				break;
-			case 39: // OPERATIONS_CP_L
-				System.out.println("Error type: It was expected a '(', ')', ';' or logical symbol");
-				break;
-			case 40: // OPERATIONS_FUNC_PC_L
-				System.out.println("Error type: It was expected a ')'");
-				break;
-			case 41: // IF_OP
-				System.out.println("Error type: It was expected a '('");
-				break;
-			case 42: // IF_ID
-				System.out.println("Error type: It was expected a variable");
-				break;
-			case 43: // IF_CP
-				System.out.println("Error type: It was expected a ')'");
-				break;
-			case 44: // IF_OK
-				System.out.println("Error type: It was expected a '{'");
-				break;
-			case 45: // IF_OPT_OP_CK
-				System.out.println("Error type: It was expected a '}', variable, if or while");
-				break;
-			case 46: // WHILE_OP
-				System.out.println("Error type: It was expected a '('");
-				break;
-			case 47: // WHILE_ID
-				System.out.println("Error type: It was expected a variable");
-				break;
-			case 48: // WHILE_CP
-				System.out.println("Error type: It was expected a ')'");
-				break;
-			case 49: // WHILE_OK
-				System.out.println("Error type: It was expected a '{'");
-				break;
-			case 50: // WHILE_OPT_OP_CK
-				System.out.println("Error type: It was expected a '}', variable, if, while or return");
-				break;
-			case 51: // WHILE_IF_CLOSE_K
-				System.out.println("Error type: It was expected a '}', variable, if, while or return");
-				break;
-			case 52: // DENIAL_ID
-				System.out.println("Error type: It was expected variable");
-				break;
-			case 53: // DENIAL_SEMICOLON
-				System.out.println("Error type: It was expected ';'");
-				break;
-			case 54: // RETURN_ID
-				System.out.println("Error type: It was expected variable");
-				break;
-			case 55: // RETURN_SEMICOLON
-				System.out.println("Error type: It was expected ';'");
-				break;
-			case 56: // MAIN_OP
-				System.out.println("Error type: It was expected a '('");
-				break;
-			case 57: // MAIN_CP
-				System.out.println("Error type: It was expected a ')'");
-				break;
-			case 58: // MAIN_OK
-				System.out.println("Error type: It was expected a '{'");
-				break;
-			case 59: // MAIN_OPT_K_D
-				System.out.println("Error type: It was expected a '}' or data-type");
-				break;
-			case 60: // DECLARATIONS_ID
-				System.out.println("Error type: It was expected an id for a new variable");
-				break;
-			case 61: // DECLARATIONS_SEMICOLON
-				System.out.println("Error type: It was expected a ';' for a new variable");
-				break;
-			case 62: // DECLARATIONS_OPT_D_O
-				System.out.println("Error type: It was expected a variable, if or while, data-type for a new variable or return");
-				break;
-			case 63: // OPERATIONS_OPT_I_OP
-				System.out.println("Error type: It was expected a variable, integer or float");
-				break;
-			case 64: // OPERATIONS_ASSIGNMENT
-				System.out.println("Error type: It was expected a '='");
-				break;
-			case 65: // OPERATIONS
-				System.out.println("Error type: It was expected a '!', '(', variable, function, integer or float, boolean");
-				break;
-			case 66: // OPERATIONS_OPT_S_A_L
-				System.out.println("Error type: It was expected a ';', relational symbol, logical symbol or arithmetic symbol");
-				break;
-			case 67: // OPERATIONS_CP
-				System.out.println("Error type: It was expected a ';', '(', ')', arithmetic symbol or logical symbol");
-				break;
-			case 68: // OPERATIONS_OPT_A_L_P
-				System.out.println("Error type: It was expected a ';', ')', arithmetic symbol");
-				break;
-			case 69: // OPERATIONS_OPT_S_CP
-				System.out.println("Error type: It was expected a ';', ')', arithmetic symbol");
-				break;
-			case 70: // OPERATIONS_FUNC_PC
-				System.out.println("Error type: It was expected a ')'");
-				break;
-			case 71: // OPERATIONS_OPT_I_R
-				System.out.println("Error Type: It was expected a variable, if, while, return");
-				break;
-			case 72: // OPERATIONS_R
-				System.out.println("Error Type: It was expected a variable, float or integer");
-				break;
-			case 73: // OPERATIONS_S
-				System.out.println("Error Type: It was expected a ';'");
-				break;
-			case 74: // OPERATIONS_ID
-				System.out.println("Error type: It was expected a ';', ')', relational symbol, arithmetic symbol or logical symbol");
-				break;
-			case 75: // OPERATIONS_OPT_I_OP_A
-				System.out.println("Error type: It was expected a '(', variable, function, integer or float");
-				break;
-			case 76: // OPERATIONS_OPT_A_P
-				System.out.println("Error type: It was expected a ';', ')', arithmetic symbol");
-				break;
-			case 77: // OPERATIONS_I_A_CP
-				System.out.println("Error type: It was expected a variable, function, integer or float");
-				break;
-			case 78: // OPERATIONS_A_CP
-				System.out.println("Error type: It was expected a ')', ';' or arithmetic symbol");
-				break;
-			case 79: // OPERATIONS_OPT_S_CP_A
-				System.out.println("Error type: It was expected a ')', ';' or arithmetic symbol");
-				break;
-			case 80: // OPERATIONS_CP_A
-				System.out.println("Error type: It was expected a '(', ')', ';' or arithmetic symbol");
-				break;
-			case 81: // OPERATIONS_FUNC_PC_A
-				System.out.println("Error type: It was expected a ')'");
-				break;
-			case 82: // OPERATIONS_B
-				System.out.println("Error type: It was expected a logical symbol or ';'");
-				break;
-			case 83: // OPERATIONS_OPT_I_OP_L
-				System.out.println("Error type: It was expected a '(', variable, function, integer or float");
-				break;
-			case 84: // OPERATIONS_OPT_L_P
-				System.out.println("Error type: It was expected a ';', ')', logical symbol");
-				break;
-			case 85: // OPERATIONS_I_L_CP
-				System.out.println("Error type: It was expected a variable, function, integer or float");
-				break;
-			case 86: // OPERATIONS_L_CP
-				System.out.println("Error type: It was expected a ')', ';' or logical symbol");
-				break;
-			case 87: // OPERATIONS_OPT_S_CP_L
-				System.out.println("Error type: It was expected a ')', ';' or logical symbol");
-				break;
-			case 88: // OPERATIONS_CP_L
-				System.out.println("Error type: It was expected a '(', ')', ';' or logical symbol");
-				break;
-			case 89: // OPERATIONS_FUNC_PC_L
-				System.out.println("Error type: It was expected a ')'");
-				break;
-			case 90: // IF_OP
-				System.out.println("Error type: It was expected a '('");
-				break;
-			case 91: // IF_ID
-				System.out.println("Error type: It was expected a variable");
-				break;
-			case 92: // IF_CP
-				System.out.println("Error type: It was expected a ')'");
-				break;
-			case 93: // IF_OK
-				System.out.println("Error type: It was expected a '{'");
-				break;
-			case 94: // IF_OPT_OP_CK
-				System.out.println("Error type: It was expected a '}', variable, if or while");
-				break;
-			case 95: // WHILE_OP
-				System.out.println("Error type: It was expected a '('");
-				break;
-			case 96: // WHILE_ID
-				System.out.println("Error type: It was expected a variable");
-				break;
-			case 97: // WHILE_CP
-				System.out.println("Error type: It was expected a ')'");
-				break;
-			case 98: // WHILE_OK
-				System.out.println("Error type: It was expected a '{'");
-				break;
-			case 99: // WHILE_OPT_OP_CK
-				System.out.println("Error type: It was expected a '}', variable, if or while");
-				break;
-			case 100: // DENIAL_ID
-				System.out.println("Error type: It was expected variable");
-				break;
-			case 101: // DENIAL_SEMICOLON
-				System.out.println("Error type: It was expected ';'");
-				break;
 			default:
-				System.out.println("Error Type: They shouldn't be items outside functions");
+				System.out.println("Error Type: That shouldn't be there");
 				break;
 		}
     }
@@ -1420,56 +835,14 @@ public class SyntacticLexiconAnalysis {
     	boolean balance = true;
     	boolean hasMain = false;
     	int knowMain = 0;
-    	SyntacticStates syntacticState = SyntacticStates.FUNC_DATA;
+    	SyntacticStates syntacticState = SyntacticStates.PROGRAM;
     	int positionState = 0;
     	for (int i = 0; i < tokens.size(); i++) {
     		knowMain++;
     		syntacticState = syntacticState.transition(tokens.get(i).type);
-    		if ((syntacticState == SyntacticStates.OPERATIONS_OPT_I_OP || syntacticState == SyntacticStates.M_OPERATIONS_OPT_I_OP
-    				|| syntacticState == SyntacticStates.OPERATIONS_OPT_I_OP_A || syntacticState == SyntacticStates.OPERATIONS_OPT_I_OP_L) 
-    				&& tokens.get(i).type == "opening-parenthesis") {
-    			parenthesis.add(tokens.get(i).id);
-    		} else if ((syntacticState == SyntacticStates.OPERATIONS_OPT_S_CP 
-    				|| syntacticState == SyntacticStates.M_OPERATIONS_OPT_S_CP
-    				|| syntacticState == SyntacticStates.OPERATIONS_OPT_S_CP_A
-    				|| syntacticState == SyntacticStates.OPERATIONS_OPT_S_CP_L) && tokens.get(i).type == "closing-parenthesis") {
-    			if (!parenthesis.isEmpty()){
-					parenthesis.remove((parenthesis.size() - 1));
-				} else {
-    				printUnbalancedParenthesisError(i);
-					balance = false;
-        			break;
-				}
-    		} else if (syntacticState == SyntacticStates.OPERATIONS_OPT_I_R && tokens.get(i).type == "semicolon"
-    				|| syntacticState == SyntacticStates.M_OPERATIONS_OPT_I_R && tokens.get(i).type == "semicolon") {
-    			if (parenthesis.size() > 0) {
-    				printUnbalancedParenthesisError(i);
-    				balance = false;
-        			break;
-                } 
-    		} else if (syntacticState == SyntacticStates.FUNC_OPEN_P) {
-    			tokens.get(i).type = "function";
-    		} else if (syntacticState == SyntacticStates.DECLARATIONS_SEMICOLON || syntacticState == SyntacticStates.FUNC_OPT_C_P ||
-    				syntacticState == SyntacticStates.OPERATIONS_ASSIGNMENT ||  syntacticState == SyntacticStates.M_OPERATIONS_ASSIGNMENT ||
-    				syntacticState == SyntacticStates.M_DECLARATIONS_SEMICOLON ) {
-    			tokens.get(i).type = "variable";
-    		} else if ((syntacticState == SyntacticStates.OPERATIONS_FUNC_PC || syntacticState == SyntacticStates.M_OPERATIONS_FUNC_PC
-    				|| syntacticState == SyntacticStates.OPERATIONS_FUNC_PC_A || syntacticState == SyntacticStates.M_OPERATIONS_FUNC_PC_A
-    				|| syntacticState == SyntacticStates.OPERATIONS_FUNC_PC_L || syntacticState == SyntacticStates.M_OPERATIONS_FUNC_PC_L)
-    				&& (tokens.get(i-1).type == "identifier" || tokens.get(i-1).type == "variable") ) {
-    			tokens.get(i-1).type = "function";
-    		} else if ((syntacticState == SyntacticStates.OPERATIONS_ID || syntacticState == SyntacticStates.OPERATIONS_OPT_A_L_P
-    				|| syntacticState == SyntacticStates.OPERATIONS_CP || syntacticState == SyntacticStates.IF_CP 
-    				|| syntacticState == SyntacticStates.WHILE_CP || syntacticState == SyntacticStates.DENIAL_SEMICOLON 
-    				|| syntacticState == SyntacticStates.RETURN_SEMICOLON || syntacticState == SyntacticStates.M_OPERATIONS_ID 
-    				|| syntacticState == SyntacticStates.M_OPERATIONS_OPT_A_L_P || syntacticState == SyntacticStates.M_OPERATIONS_CP 
-    				|| syntacticState == SyntacticStates.M_IF_CP || syntacticState == SyntacticStates.M_WHILE_CP 
-    				|| syntacticState == SyntacticStates.M_DENIAL_SEMICOLON || syntacticState == SyntacticStates.OPERATIONS_CP_A
-    				|| syntacticState == SyntacticStates.OPERATIONS_CP_L || syntacticState == SyntacticStates.M_OPERATIONS_CP_A
-    				|| syntacticState == SyntacticStates.M_OPERATIONS_CP_L || syntacticState == SyntacticStates.OPERATIONS_S
-    				|| syntacticState == SyntacticStates.M_OPERATIONS_S) && tokens.get(i).type == "identifier") {
-    			tokens.get(i).type = "variable";
-    		} else if (syntacticState == SyntacticStates.ERROR && !isSyntaxError) {
+    		System.out.println(syntacticState);
+    		System.out.println(tokens.get(i).id + " " + tokens.get(i).type);
+    		if (syntacticState == SyntacticStates.ERROR && !isSyntaxError) {
     			System.out.println("--------------------------------------------------------");
     			System.out.println("Syntactic Error");
     			System.out.println("--------------------------------------------------------");

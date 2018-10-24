@@ -1,8 +1,0 @@
-
-public class Token {
-	public String id;
-	public String type;
-	public Integer line;
-	public Integer initCharacter;
-	
-}

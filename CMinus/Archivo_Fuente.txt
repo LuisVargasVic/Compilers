@@ -1,7 +1,9 @@
-int fact(int x)
+int fact(int x, void)
 { 
-    int x;
-    if(x>1)
+    if (x > 1 - e(e()))
+        while (x > 1 - e(e())){
+            1 + 1;
+        }
         return x * fact(x-1);
     else 
         return 1;
