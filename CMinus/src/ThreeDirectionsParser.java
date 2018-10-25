@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 class ThreeDirectionsParser {
     public List<Token> tokens = new ArrayList<Token>();
@@ -474,6 +475,7 @@ class ThreeDirectionsParser {
 
     private String multipleExpression() {
         ArrayList<String> expressionArray = new ArrayList<>();
+        Stack<String> parenthesisStack = new Stack<>();
 
         while (!currentToken.type.equals("semicolon")) {
             String term = "";
@@ -495,14 +497,22 @@ class ThreeDirectionsParser {
                 if (currentToken.type.equals("opening-parenthesis") && !isFunctionCall)
                     break;
 
+                if (currentToken.type.equals("opening-parenthesis") && isFunctionCall) {
+                    parenthesisStack.push("(");
+                }
+
                 if (currentToken.type.equals("closing-parenthesis") && !isFunctionCall)
                     break;
 
                 term += currentToken.id;
 
                 if (currentToken.type.equals("closing-parenthesis") && isFunctionCall) {
-                    updateCurrentToken(1);
-                    break;
+                   parenthesisStack.pop();
+
+                    if (parenthesisStack.isEmpty()) {
+                        updateCurrentToken(1);
+                        break;
+                    }
                 }
 
                 updateCurrentToken(1);
@@ -518,6 +528,7 @@ class ThreeDirectionsParser {
             expressionArray.add(currentToken.id);
 
             updateCurrentToken(1);
+            parenthesisStack = new Stack<>();
         }
 
 
@@ -560,6 +571,7 @@ class ThreeDirectionsParser {
                 closeParenthesisIndex = i;
 
                 ArrayList<String> subExpressionArr = new ArrayList<>(expressionArray.subList(openParenthesisIndex+1, closeParenthesisIndex));
+
                 String resultTerm = multipleExp(subExpressionArr);
 
                 for (int j = closeParenthesisIndex; j >= openParenthesisIndex; j--) {
@@ -567,6 +579,8 @@ class ThreeDirectionsParser {
                 }
 
                 expressionArray.add(openParenthesisIndex, resultTerm);
+
+                i = -1;
             }
         }
 
@@ -583,16 +597,8 @@ class ThreeDirectionsParser {
                 expressionArray.remove(i);
                 expressionArray.remove(i-1);
 
-                for (String term : expressionArray) {
-                    System.out.println("Item 1: " + term);
-                }
 
                 expressionArray.add(i-1, resultTerm);
-                System.out.println();
-                for (String term : expressionArray) {
-                    System.out.println("Item 1: " + term);
-                }
-                System.out.println();
 
                 i = -1;
             }
@@ -611,18 +617,8 @@ class ThreeDirectionsParser {
                 expressionArray.remove(i);
                 expressionArray.remove(i-1);
 
-                for (String term : expressionArray) {
-                    System.out.println("Item 2: " + term);
-                }
-
                 expressionArray.add(i-1, resultTerm);
-                System.out.println();
-                for (String term : expressionArray) {
-                    System.out.println("Item 2: " + term);
-                }
-                System.out.println();
-
-
+                
                 i = -1;
             }
         }
@@ -642,12 +638,22 @@ class ThreeDirectionsParser {
 
         String functionName = function.split("\\(")[0];
 
+        Stack<String> parenthesisStack = new Stack<>();
+
         boolean parenthesisFlag = false;
         for (char currentChar : function.toCharArray()) {
-            if (currentChar == ')')
-                break;
+            if (currentChar == ')') {
+                parenthesisStack.pop();
+
+                if (parenthesisStack.isEmpty())
+                    break;
+            }
             if (currentChar == '(') {
+                parenthesisStack.push("(");
                 parenthesisFlag = true;
+
+                if (parenthesisStack.size() > 1)
+                    args.append(currentChar);
             }
             else if (parenthesisFlag) {
                 args.append(currentChar);
@@ -689,10 +695,11 @@ class ThreeDirectionsParser {
             char currentChar = termStr.charAt(i);
 
             if (currentChar == '+' || currentChar == '-' || currentChar == '*' || currentChar == '/' || currentChar == '(' || currentChar == ')') {
+
                 if (!term.isEmpty()) {
                     termsArr.add(term);
-                    termsArr.add(currentChar + "");
                 }
+                termsArr.add(currentChar + "");
 
                 term = "";
                 isFunctionCall = false;
