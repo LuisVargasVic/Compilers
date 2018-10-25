@@ -479,7 +479,7 @@ class ThreeDirectionsParser {
             String term = "";
             boolean isFunctionCall = false;
 
-            if (currentToken.type.equals("identifier") && peekNextToken(1).type.equals("opening-parenthesis"))
+            if (currentToken.type.equals("function") || (currentToken.type.equals("identifier") && peekNextToken(1).type.equals("opening-parenthesis")))
                 isFunctionCall = true;
 
             while (true) {
@@ -654,15 +654,17 @@ class ThreeDirectionsParser {
             }
         }
 
-        System.out.println("argumants string: " + args);
+        System.out.println("arguments string: " + args);
 
         String[] argsArray = args.toString().split(",");
 
         stringBuilder.append("begin_args").append("\n");
 
         for (String arg : argsArray) {
-            String[] argAsArray = arg.split("");
-            String resultTerm = multipleExp(new ArrayList<>(Arrays.asList(argAsArray)));
+            //String[] argAsArray = arg.split("");
+            ArrayList<String> argAsList = splitStringIntoTermsArr(arg);
+
+            String resultTerm = multipleExp(argAsList);
 
             String newTerm = getNewTerm();
 
@@ -674,5 +676,36 @@ class ThreeDirectionsParser {
         stringBuilder.append(resultTerm).append(" = call ").append(functionName).append(", ").append(argsArray.length).append("\n");
 
         return resultTerm;
+    }
+
+    private ArrayList<String> splitStringIntoTermsArr(String termStr) {
+        System.out.println("term to split: " + termStr);
+        ArrayList<String> termsArr = new ArrayList<>();
+
+        String term = "";
+        boolean isFunctionCall = false;
+
+        for (int i = 0; i < termStr.length(); i++) {
+            char currentChar = termStr.charAt(i);
+
+            if (currentChar == '+' || currentChar == '-' || currentChar == '*' || currentChar == '/' || currentChar == '(' || currentChar == ')') {
+                if (!term.isEmpty()) {
+                    termsArr.add(term);
+                    termsArr.add(currentChar + "");
+                }
+
+                term = "";
+                isFunctionCall = false;
+                continue;
+            }
+
+
+            term += currentChar;
+        }
+
+        if (!term.isEmpty())
+            termsArr.add(term);
+
+        return termsArr;
     }
 }
