@@ -57,7 +57,7 @@ public class SyntacticLexiconAnalysis {
     	 * The transition for lexicon gets a char and according to the state 
     	 * that it is moves to the reference or goes to the default that is error 
     	 * if it doesn't identifies the type. 
-    	 * @param st
+    	 * @param
     	 * @return
     	 */
         LexiconStates transition(char ch) {
@@ -853,7 +853,10 @@ public class SyntacticLexiconAnalysis {
     		knowMain++;
     		syntacticState = syntacticState.transition(tokens.get(i).type);
     		System.out.println(syntacticState + " " + tokens.get(i).id + " " + tokens.get(i).type);
-    		if (syntacticState == SyntacticStates.ERROR && !isSyntaxError) {
+			if (tokens.get(i).type == "opening-parenthesis" && tokens.get(i-1).type == "identifier") {
+				tokens.get(i-1).type = "function";
+			}
+			else if (syntacticState == SyntacticStates.ERROR && !isSyntaxError) {
     			System.out.println("--------------------------------------------------------");
     			System.out.println("Syntactic Error");
     			System.out.println("--------------------------------------------------------");
@@ -907,6 +910,9 @@ public class SyntacticLexiconAnalysis {
         	if (!ids.isEmpty()) { printTokenTable(); }
         	if (!tokens.isEmpty()) { printLexicSymbolsTable(); }
         	syntacticAnalysis();
+        	ThreeDirectionsParser parser = new ThreeDirectionsParser();
+        	parser.tokens = tokens;
+        	parser.doThreeDirectionsParser();
         }   	
         
     }	
