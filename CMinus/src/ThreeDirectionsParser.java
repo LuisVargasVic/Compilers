@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class ThreeDirectionsParser {
@@ -177,7 +178,9 @@ class ThreeDirectionsParser {
 
                 updateCurrentToken(2);
 
-                String lastTerm = expression();
+                String lastTerm = multipleExpression();
+
+                //String lastTerm = expression();
 
                 stringBuilder.append(idLeft).append(" = ").append(lastTerm).append("\n");
 
@@ -367,7 +370,7 @@ class ThreeDirectionsParser {
         String rightTerm = "";
 
         if (!peekNextToken(1).type.equals("add") && !peekNextToken(1).type.equals("mul") && !peekNextToken(1).type.equals("relational")) {
-            if (currentToken.type.equals("function")) {
+            if (currentToken.type.equals("function") || peekNextToken(1).type.equals("opening-parenthesis")) {
                 String lastTerm = functionCall();
 
                 if (currentToken.type.equals("add") || currentToken.type.equals("mul") || currentToken.type.equals("relational")) {
@@ -402,7 +405,7 @@ class ThreeDirectionsParser {
 
         String operator = peekNextToken(1).id;
 
-        if (currentToken.type.equals("function")) {
+        if (currentToken.type.equals("function") || peekNextToken(1).type.equals("opening-parenthesis")) {
             leftTerm = functionCall();
             updateCurrentToken(1);
         }
@@ -466,6 +469,210 @@ class ThreeDirectionsParser {
         stringBuilder.append(resultTerm).append(" = call ").append(functionName).append(", ").append(argumentsListCount).append("\n");
 
         updateCurrentToken(1);
+        return resultTerm;
+    }
+
+    private String multipleExpression() {
+        ArrayList<String> expressionArray = new ArrayList<>();
+
+        while (!currentToken.type.equals("semicolon")) {
+            String term = "";
+            boolean isFunctionCall = false;
+
+            if (currentToken.type.equals("identifier") && peekNextToken(1).type.equals("opening-parenthesis"))
+                isFunctionCall = true;
+
+            while (true) {
+                if (currentToken.type.equals("add") && !isFunctionCall)
+                    break;
+
+                if (currentToken.type.equals("mul") && !isFunctionCall)
+                    break;
+
+                if (currentToken.type.equals("semicolon") && !isFunctionCall)
+                    break;
+
+                if (currentToken.type.equals("opening-parenthesis") && !isFunctionCall)
+                    break;
+
+                if (currentToken.type.equals("closing-parenthesis") && !isFunctionCall)
+                    break;
+
+                term += currentToken.id;
+
+                if (currentToken.type.equals("closing-parenthesis") && isFunctionCall) {
+                    updateCurrentToken(1);
+                    break;
+                }
+
+                updateCurrentToken(1);
+            }
+
+            if (!term.isEmpty())
+                expressionArray.add(term);
+
+            if (currentToken.type.equals("semicolon")) {
+                break;
+            }
+
+            expressionArray.add(currentToken.id);
+
+            updateCurrentToken(1);
+        }
+
+
+        String lastResult = multipleExp(expressionArray);
+
+
+        return lastResult;
+    }
+
+    private String multipleExp(ArrayList<String> expressionArray) {
+        int openParenthesisIndex = -1;
+        int closeParenthesisIndex = -1;
+
+        for (String term : expressionArray) {
+            System.out.println("Term: " + term);
+        }
+
+        System.out.println();
+
+        for (int i = 0; i < expressionArray.size(); i++) {
+            String currentTerm = expressionArray.get(i);
+
+            if (currentTerm.contains("(") && currentTerm.contains(")")) {
+                String result = expressionForGivenFunction(currentTerm);
+
+                expressionArray.remove(i);
+                expressionArray.add(i, result);
+
+                i = -1;
+            }
+        }
+
+        for (int i = 0; i < expressionArray.size(); i++) {
+            String currentTerm = expressionArray.get(i);
+
+            if (currentTerm.equals("(")) {
+                openParenthesisIndex = i;
+            }
+            else if (currentTerm.equals(")")) {
+                closeParenthesisIndex = i;
+
+                ArrayList<String> subExpressionArr = new ArrayList<>(expressionArray.subList(openParenthesisIndex+1, closeParenthesisIndex));
+                String resultTerm = multipleExp(subExpressionArr);
+
+                for (int j = closeParenthesisIndex; j >= openParenthesisIndex; j--) {
+                    expressionArray.remove(j);
+                }
+
+                expressionArray.add(openParenthesisIndex, resultTerm);
+            }
+        }
+
+        for (int i = 0; i < expressionArray.size(); i++) {
+            String currentTerm = expressionArray.get(i);
+
+            if (currentTerm.equals("*") || currentTerm.equals("/")) {
+                String leftTerm = expressionArray.get(i-1);
+                String rightTerm = expressionArray.get(i+1);
+
+                String resultTerm = expressionForGivenTerms(leftTerm, currentTerm, rightTerm);
+
+                expressionArray.remove(i+1);
+                expressionArray.remove(i);
+                expressionArray.remove(i-1);
+
+                for (String term : expressionArray) {
+                    System.out.println("Item 1: " + term);
+                }
+
+                expressionArray.add(i-1, resultTerm);
+                System.out.println();
+                for (String term : expressionArray) {
+                    System.out.println("Item 1: " + term);
+                }
+                System.out.println();
+
+                i = -1;
+            }
+        }
+
+        for (int i = 0; i < expressionArray.size(); i++) {
+            String currentTerm = expressionArray.get(i);
+
+            if (currentTerm.equals("+") || currentTerm.equals("-")) {
+                String leftTerm = expressionArray.get(i-1);
+                String rightTerm = expressionArray.get(i+1);
+
+                String resultTerm = expressionForGivenTerms(leftTerm, currentTerm, rightTerm);
+
+                expressionArray.remove(i+1);
+                expressionArray.remove(i);
+                expressionArray.remove(i-1);
+
+                for (String term : expressionArray) {
+                    System.out.println("Item 2: " + term);
+                }
+
+                expressionArray.add(i-1, resultTerm);
+                System.out.println();
+                for (String term : expressionArray) {
+                    System.out.println("Item 2: " + term);
+                }
+                System.out.println();
+
+
+                i = -1;
+            }
+        }
+
+        return expressionArray.get(0);
+    }
+
+    private String expressionForGivenTerms(String leftTerm, String operator, String rightTerm) {
+        String resultTerm = getNewTerm();
+
+        stringBuilder.append(resultTerm).append(" = ").append(leftTerm).append(" ").append(operator).append(" ").append(rightTerm).append("\n");
+        return resultTerm;
+    }
+
+    private String expressionForGivenFunction(String function) {
+        StringBuilder args = new StringBuilder();
+
+        String functionName = function.split("\\(")[0];
+
+        boolean parenthesisFlag = false;
+        for (char currentChar : function.toCharArray()) {
+            if (currentChar == ')')
+                break;
+            if (currentChar == '(') {
+                parenthesisFlag = true;
+            }
+            else if (parenthesisFlag) {
+                args.append(currentChar);
+            }
+        }
+
+        System.out.println("argumants string: " + args);
+
+        String[] argsArray = args.toString().split(",");
+
+        stringBuilder.append("begin_args").append("\n");
+
+        for (String arg : argsArray) {
+            String[] argAsArray = arg.split("");
+            String resultTerm = multipleExp(new ArrayList<>(Arrays.asList(argAsArray)));
+
+            String newTerm = getNewTerm();
+
+            stringBuilder.append(newTerm).append(" = ").append(resultTerm).append("\n");
+            stringBuilder.append("param ").append(newTerm).append("\n");
+        }
+
+        String resultTerm = getNewTerm();
+        stringBuilder.append(resultTerm).append(" = call ").append(functionName).append(", ").append(argsArray.length).append("\n");
+
         return resultTerm;
     }
 }
