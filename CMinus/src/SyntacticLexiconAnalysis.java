@@ -633,16 +633,21 @@ public class SyntacticLexiconAnalysis {
     		E_ST.openingBrackets = E_AG_LT;
     		
     		E_ST_E.id = E_OP; 
+    		E_ST_E.integer = E_MA;
     		E_ST_E.openingParenthesis = E_AG_LT;
     		E_ST_E.openingBrackets = E_AG_LT;
     		
-    		E_OP.semicolon = FªV_ST_D; 
+    		E_OP.semicolon = FªV_ST_D;
+    		E_OP.mul = E_FT;						 
+    		E_OP.add = E_FT; 																
+    		E_OP.relational = E_AD;
     		E_OP.assignation = E_ST_E; 
     		E_OP.openingParenthesis = E_AG_LT;
     		E_OP.openingBrackets = E_AG_LT;
     		
     		E_FT.id = E_MA; 						E_AD.id = E_REL;
-    		E_FT.integer = E_MA; 					E_AD.integer = E_REL; 
+    		E_FT.integer = E_MA;					E_AD.integer = E_REL; 
+    		E_FT._int = P5_ID;
     		E_FT.openingParenthesis = E_E;			E_AD.openingParenthesis = E_E;
     		E_FT._void = ST;
     		
@@ -882,7 +887,12 @@ public class SyntacticLexiconAnalysis {
         	}
         }
     	if (!hasMain && knowMain == tokens.size()) { printNoMain(); }
-    	if (!tokens.isEmpty() && !isSyntaxError && balance && hasMain) { printSyntacticSymbolsTable(); }
+    	if (!tokens.isEmpty() && !isSyntaxError && balance && hasMain) { 
+    		printSyntacticSymbolsTable();
+	    	ThreeDirectionsParser parser = new ThreeDirectionsParser();
+	    	parser.tokens = tokens;
+	    	parser.doThreeDirectionsParser();
+    	}
     }
 
    
@@ -910,9 +920,7 @@ public class SyntacticLexiconAnalysis {
         	if (!ids.isEmpty()) { printTokenTable(); }
         	if (!tokens.isEmpty()) { printLexicSymbolsTable(); }
         	syntacticAnalysis();
-        	ThreeDirectionsParser parser = new ThreeDirectionsParser();
-        	parser.tokens = tokens;
-        	parser.doThreeDirectionsParser();
+        	
         }   	
         
     }	
