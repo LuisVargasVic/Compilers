@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
     	LexiconAnalysis lexicon = new LexiconAnalysis();
 		String str = "";
-    	str = lexicon.readFile("Fuente.txt");
+    	str = lexicon.readFile("Archivo_Fuente.txt");
     	/** Make lexicon analysis */
     	lexicon.lexiconAnalysis(str);
         /**
@@ -23,7 +23,9 @@ public class Main {
          */
         else {
         	if (!LexiconAnalysis.ids.isEmpty()) { lexicon.printTokenTable(); }
-        	/** syntacticAnalysis(); */
+        	SyntacticAnalysis syntactic = new SyntacticAnalysis();
+        	SyntacticAnalysis.tokens = LexiconAnalysis.tokens;
+        	syntactic.syntacticAnalysis(); 
         	
         }   	
         
