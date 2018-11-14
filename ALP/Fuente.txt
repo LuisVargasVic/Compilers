@@ -1,0 +1,4 @@
+To Check 
+he print("mood: " + mood), 
+he print("energy: " + energy.toString), 
+he print("Position" + coordinatePosition.toString).
