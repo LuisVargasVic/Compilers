@@ -24,8 +24,15 @@ public class Main {
         else {
         	if (!LexiconAnalysis.ids.isEmpty()) { lexicon.printTokenTable(); }
         	/** syntacticAnalysis(); */
-        	
-        }   	
-        
+
+			// TODO: Check if everything went well with the syntatic analysis
+			KotlinParser parser = new KotlinParser(LexiconAnalysis.tokens);
+			if (parser.ParseToKotlin()) {
+				// TODO: Everything went well parsing.
+			}
+			else {
+				// TODO: Something bad happened while parsing.
+			}
+        }
     }	
 }
