@@ -234,7 +234,11 @@ public class SyntacticAnalysis {
 				if (tokens.get(i-6).type == "identifier") {
 					tokens.get(i-6).type = "pairID";
 				}
-			}
+			} else if (tokens.get(i).type == "identifier" && syntacticState == SyntacticStates.CFNEXT) {
+				tokens.get(i).type = "createFunction";
+			} else if (tokens.get(i).type == "identifier" && syntacticState == SyntacticStates.F_PRO_POS_R) {
+				tokens.get(i).type = "function";
+			} 
 			else if (syntacticState == SyntacticStates.ERROR && !isSyntaxError) {
     			System.out.println("--------------------------------------------------------");
     			System.out.println("Syntactic Error");

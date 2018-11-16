@@ -2,12 +2,18 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="while" key="selection"/>
+		<item value="pairID" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="pairID"/>
+			<item value="PairID"/>
+			<item value="PairId"/>
+			<item value="float"/>
+			<item value="period"/>
+			<item value="perios"/>
 			<item value="while"/>
 			<item value="main"/>
 			<item value="_else"/>
@@ -17,12 +23,6 @@
 			<item value="Data type"/>
 			<item value="identifier"/>
 			<item value="integer"/>
-			<item value="It was expected a &apos;;&apos;, &apos;)&apos;, arithmetic symbol or logical symbol"/>
-			<item value="return"/>
-			<item value="ids"/>
-			<item value="openingParenthesis"/>
-			<item value="openParenthesis"/>
-			<item value="positionState"/>
 		</list>
 		<list key="replacehistory">
 		</list>
