@@ -31,13 +31,49 @@ public class KotlinParser {
     }
 
     public boolean ParseToKotlin() {
+    		print("holis", true);
         parseClassDeclaration();
+        //parseFunction();
 
         // TODO: Here parse class methods and check if parsing was good or not...
 
 
         return true;
     }
+    
+    /*
+    private boolean parseFunction() {
+    		String code = "";
+    		/*
+    		while(currentToken.type == "createFunction") {
+    			print("def  " + currentToken.id, false);
+	    		updateCurrentToken();
+	    		if(currentToken.type == "pronoun" && peekToken(1).type == "needs") {
+	    			updateCurrentToken();
+	    			print("(self, "+currentToken.id+");", true );
+	    			
+	    		}
+	    		else {
+	    			updateCurrentToken();
+	    			print("(self);", true );
+	    		}
+	    	}
+    		return true;
+    		
+	    	if (currentToken.type == "createFunction") {
+	    		print("def  " + currentToken.id, false);
+	    		updateCurrentToken();
+	    		if(currentToken.type == "pronoun" && peekToken(1).type == "needs") {
+	    			updateCurrentToken();
+	    			print("(self, "+currentToken.id+");", true );
+	    			
+	    		}
+	    		else {
+	    			print("(self);", true );
+	    		}
+	    	}
+	    		return true;
+    }*/
 
     private boolean parseClassDeclaration() {
         if (currentToken.id == "A" && peekToken(1).type == "class") {
@@ -49,7 +85,12 @@ public class KotlinParser {
             updateCurrentToken();
         }
 
-        if (currentToken.id == "To") { return true; }
+        if (currentToken.id == "To") {
+        		//updateCurrentToken();
+        		//parseFunction();
+        		return true;
+        	
+        }
 
         // TODO: Check attributes
         if (peekToken(1).id == "has") {
