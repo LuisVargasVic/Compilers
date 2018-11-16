@@ -33,56 +33,64 @@ public class KotlinParser {
     public boolean ParseToKotlin() {
         parseClassDeclaration();
 
+
         // TODO: Here parse class methods and check if parsing was good or not...
 
 
+        print("}", true);
         return true;
     }
 
     private boolean parseClassDeclaration() {
-        if (currentToken.id == "A" && peekToken(1).type == "class") {
+        print(currentToken.id + " - " + peekToken(1).type, true);
+        if (currentToken.id.equals("A") && peekToken(1).type.equals("class")) {
             updateCurrentToken();
-            print("class " + currentToken.id, true);
+            print("public class " + currentToken.id + " {", true);
+        }
+        else
+            return false;
+
+        while (!currentToken.id.contains("He") && !currentToken.id.contains("She") && !currentToken.id.contains("To")) {
+            updateCurrentToken();
         }
 
-        while (currentToken.id != "He" || currentToken.id != "She" || currentToken.id != "To") {
-            updateCurrentToken();
-        }
-
-        if (currentToken.id == "To") { return true; }
+        if (currentToken.id.equals("To")) { return true; }
 
         // TODO: Check attributes
-        if (peekToken(1).id == "has") {
+        if (peekToken(1).id.contains("has")) {
             updateCurrentToken();
-            while (currentToken.id != ".") {
+            while (!currentToken.id.contains(".")) {
                 updateCurrentToken();
                 String attributeName = currentToken.id;
                 String attributeType = currentToken.type;
+
                 updateCurrentToken();
                 updateCurrentToken();
 
-                String attributeVal = "";
-                if (attributeType == "pair") {
-                    while (currentToken.id != ")") {
-                        attributeVal += currentToken.id;
+                StringBuilder attributeVal = new StringBuilder();
+                if (attributeType.contains("pairID")) {
+                    while (!currentToken.id.contains(")")) {
+                        attributeVal.append(currentToken.id);
                         updateCurrentToken();
                     }
+                    attributeVal.append(")");
                 }
                 else {
-                    attributeVal = currentToken.id;
+                    attributeVal = new StringBuilder(currentToken.id);
                 }
 
-                print(attributeType + " " + attributeName + " = " + attributeVal, true);
+                print("     " + attributeType + " " + attributeName + " = " + attributeVal, true);
                 updateCurrentToken();
             }
 
             updateCurrentToken();
         }
 
-        if (peekToken(1).id == "can") {
+        print(currentToken.id, true);
+        if (peekToken(1).id.contains("can")) {
             updateCurrentToken();
             HashSet<String> methods = new HashSet<>();
-            while (currentToken.id != ".") {
+            while (!currentToken.id.equals(".")) {
                 updateCurrentToken();
 
                 String methodName = currentToken.id;
@@ -92,6 +100,7 @@ public class KotlinParser {
             }
         }
 
+        updateCurrentToken();
         return true;
     }
 }
