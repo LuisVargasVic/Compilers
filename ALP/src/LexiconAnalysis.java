@@ -33,7 +33,7 @@ public class LexiconAnalysis {
         
     	static {
             // Initial state of the automata
-            Q0.space = Q0; Q0.letter = Q1; Q0.capital = Q1; Q0.number = Q2; Q0.symbol = Q5; Q0.equal = Q6; Q0.quotes = Q8;
+            Q0.space = Q0; Q0.letter = Q1; Q0.capital = Q1; Q0.number = Q2; Q0.symbol = Q5; Q0.equal = Q6; Q0.quotes = Q8; Q0.period = Q0;
             
             // Word
             Q1.space = Q0; Q1.letter = Q1; Q1.capital = Q1; Q1.number = Q1; Q1.symbol = Q5; Q1.period = Q0; Q1.quotes = Q8; Q1.equal = Q0;
@@ -287,24 +287,58 @@ public class LexiconAnalysis {
     	return isString;
     }
     
+    private static boolean isPronoun(String string) {
+    	boolean isPronoun = false;
+    	if (string.equals("he") || string.equals("He") || string.equals("She") || string.equals("she") 
+    			|| string.equals("it") || string.equals("It")) {
+    		isPronoun = true;
+    	}
+    	return isPronoun;
+    }
+    
+    private static boolean isPossessive(String string) {
+    	boolean isPossessive = false;
+    	if (string.equals("his") || string.equals("her") || string.equals("its")) {
+    		isPossessive = true;
+    	}
+    	return isPossessive;
+    }
+    
+    private static boolean isA(String string) {
+    	boolean isA = false;
+    	if (string.equals("a") || string.equals("A")) {
+    		isA = true;
+    	}
+    	return isA;
+    }
+    
     private static String checkId(String string) {
     	switch (string) {
-	        case "entero": return "data-type";
-	        case "logico": return "data-type";
-	        case "real": return "data-type";
-	        case "principal": return "main";
-	        case "si": return "if";
-	        case "mientras": return "while";
-	        case "regresa": return "return";
-	        case "verdadero": return "boolean";
-	        case "falso": return "boolean";
+	        case "is": return "is";
+	        case "Class": return "class";
+	        case "has": return "has";
+	        case "can": return "can";
+	        case "To": return "to";
+	        case "used": return "used";
+	        case "needs": return "needs";
+	        case "in": return "in";
+	        case "increases": return "sum";
+	        case "decreases": return "res";
+	        case "print": return "print";
+	        case "by": return "by";
+	        case "and": return "and";
+	        case "return": return "return";
+	        case "true": return "boolean";
+	        case "false": return "boolean";
 	        case ",": return "coma";
 	        case ";": return "semicolon";
 	        case "(": return "opening-parenthesis";
 	        case ")": return "closing-parenthesis";
 	        case "{": return "opening-keys";
 	        case "}": return "closing-keys";
-	        case "+": return "arithmetic";
+	        case "[": return "opening-bracket";
+	        case "]": return "closing-bracket";
+	        case "+": return "add";
 	        case "-": return "arithmetic";
 	        case "*": return "arithmetic";
 	        case "/": return "arithmetic";
@@ -316,24 +350,31 @@ public class LexiconAnalysis {
 	        case "<": return "relational";
 	        case ">": return "relational";
 	        case "==": return "relational";
-	        case ".": return "endFunction";
+	        case ".": return "end";
 	        case "\"": return "quotes";
 	        case ":": return "colon";
 	            
 	        default:
-	        	if (isIdentifier(string)) {
-	        		return "identifier";
-	        	} else if (isNumber(string)) {
+	        	if (isNumber(string)) {
 	        		return "integer";
 	        	} else if (isString(string)) {
 	        		return "string";
+	        	} else if (isPronoun(string)) {
+	        		return "pronoun";
+	        	} else if (isPossessive(string)) {
+	        		return "possesive";
+	        	} else if (isA(string)) {
+	        		return "init";
+	        	} else if (isIdentifier(string)) {
+	        		return "identifier";
 	        	} else {
 	        		return "float";
-	        	}
+	        	} 
     	}
     }
     
-    protected void lexiconAnalysis(String str) {
+    @SuppressWarnings("unlikely-arg-type")
+	protected void lexiconAnalysis(String str) {
     	LexiconStates lexiconState = LexiconStates.Q0;
     	Integer position = 0;
     	boolean isError = false;
