@@ -31,22 +31,22 @@ public class KotlinParser {
     }
 
     public boolean ParseToKotlin() {
-    		print("holis", true);
         parseClassDeclaration();
-        //parseFunction();
+        parseFunction();
+
 
         // TODO: Here parse class methods and check if parsing was good or not...
 
 
+        print("}", true);
         return true;
     }
     
-    /*
+    
     private boolean parseFunction() {
-    		String code = "";
-    		/*
-    		while(currentToken.type == "createFunction") {
-    			print("def  " + currentToken.id, false);
+    		updateCurrentToken();
+	    	if (currentToken.type == "function") {
+	    		print("def " + currentToken.id, false);
 	    		updateCurrentToken();
 	    		if(currentToken.type == "pronoun" && peekToken(1).type == "needs") {
 	    			updateCurrentToken();
@@ -54,76 +54,123 @@ public class KotlinParser {
 	    			
 	    		}
 	    		else {
-	    			updateCurrentToken();
-	    			print("(self);", true );
+	    			print("(self):", true );
 	    		}
 	    	}
-    		return true;
-    		
-	    	if (currentToken.type == "createFunction") {
-	    		print("def  " + currentToken.id, false);
-	    		updateCurrentToken();
-	    		if(currentToken.type == "pronoun" && peekToken(1).type == "needs") {
+	    	while(currentToken.type != "end") {
+	    		if(currentToken.type == "pronoun" && peekToken(1).type == "used") {
+		    		updateCurrentToken();
+		    		updateCurrentToken();
+		    		print("\tself."+currentToken.id, false);
+		    		updateCurrentToken();
+		    		if(currentToken.type == "opening-parenthesis") {
+		    			print(currentToken.id, false);
+		    			updateCurrentToken();
+		    			while(currentToken.type != "closing-parenthesis") {
+		    				print(currentToken.id, false);
+		    				updateCurrentToken();
+		    			}
+		    			print(currentToken.id, false);
+		    			updateCurrentToken();
+		    		}
+		    	}
+	    		if(currentToken.type == "coma") {
+		    		print("", true);
+		    		print("\t", false);
+		    		updateCurrentToken();
+		    	}
+	    		if(currentToken.type == "possesive") {
+		    		updateCurrentToken();
+		    		do {
+		    			print("self."+currentToken.id+" ", false);
+		    			updateCurrentToken();
+		    		} while(currentToken.type != "is" && currentToken.type != "res" && currentToken.type != "sum" );
+		    		/*
+		    		while(currentToken.type != "is" || currentToken.type != "res" || currentToken.type != "sum" ) {
+		    			print("self."+currentToken.id+" ", false);
+		    			updateCurrentToken();
+		    		}*/
+		    		if(currentToken.type == "res") {
+		    			print("-", false);
+		    			updateCurrentToken();
+		    		}
+		    		if(currentToken.type == "sum") {
+		    			print("+", false);
+		    			updateCurrentToken();
+		    		}
+		    		if(currentToken.type == "by" || currentToken.type == "is") {
+		    			print("=", false);
+		    			updateCurrentToken();
+		    		}
+		    		print(" "+currentToken.id, false);
+		    		updateCurrentToken();
+		    	}
+	    		if(currentToken.type == "return") {
+	    			print("return ", false);
 	    			updateCurrentToken();
-	    			print("(self, "+currentToken.id+");", true );
-	    			
-	    		}
-	    		else {
-	    			print("(self);", true );
+	    			if(currentToken.type != "end") {
+	    				print(currentToken.id, false);
+	    				updateCurrentToken();
+	    			}
+	    			print("", true);
 	    		}
 	    	}
 	    		return true;
-    }*/
+    }
 
     private boolean parseClassDeclaration() {
-        if (currentToken.id == "A" && peekToken(1).type == "class") {
+        print(currentToken.id + " - " + peekToken(1).type, true);
+        if (currentToken.id.equals("A") && peekToken(1).type.equals("class")) {
             updateCurrentToken();
-            print("class " + currentToken.id, true);
+            print("public class " + currentToken.id + " {", true);
+        }
+        else
+            return false;
+
+        while (!currentToken.id.contains("He") && !currentToken.id.contains("She") && !currentToken.id.contains("To")) {
+            updateCurrentToken();
         }
 
-        while (currentToken.id != "He" || currentToken.id != "She" || currentToken.id != "To") {
-            updateCurrentToken();
-        }
-
-        if (currentToken.id == "To") {
-        		//updateCurrentToken();
-        		//parseFunction();
-        		return true;
-        	
-        }
+        if (currentToken.id.equals("To")) { 
+	        	updateCurrentToken();
+	    		return true;
+        	}
 
         // TODO: Check attributes
-        if (peekToken(1).id == "has") {
+        if (peekToken(1).id.contains("has")) {
             updateCurrentToken();
-            while (currentToken.id != ".") {
+            while (!currentToken.id.contains(".")) {
                 updateCurrentToken();
                 String attributeName = currentToken.id;
                 String attributeType = currentToken.type;
+
                 updateCurrentToken();
                 updateCurrentToken();
 
-                String attributeVal = "";
-                if (attributeType == "pair") {
-                    while (currentToken.id != ")") {
-                        attributeVal += currentToken.id;
+                StringBuilder attributeVal = new StringBuilder();
+                if (attributeType.contains("pairID")) {
+                    while (!currentToken.id.contains(")")) {
+                        attributeVal.append(currentToken.id);
                         updateCurrentToken();
                     }
+                    attributeVal.append(")");
                 }
                 else {
-                    attributeVal = currentToken.id;
+                    attributeVal = new StringBuilder(currentToken.id);
                 }
 
-                print(attributeType + " " + attributeName + " = " + attributeVal, true);
+                print("     " + attributeType + " " + attributeName + " = " + attributeVal, true);
                 updateCurrentToken();
             }
 
             updateCurrentToken();
         }
 
-        if (peekToken(1).id == "can") {
+        print(currentToken.id, true);
+        if (peekToken(1).id.contains("can")) {
             updateCurrentToken();
             HashSet<String> methods = new HashSet<>();
-            while (currentToken.id != ".") {
+            while (!currentToken.id.equals(".")) {
                 updateCurrentToken();
 
                 String methodName = currentToken.id;
@@ -133,6 +180,7 @@ public class KotlinParser {
             }
         }
 
+        updateCurrentToken();
         return true;
     }
 }
