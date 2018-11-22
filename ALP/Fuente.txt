@@ -6,7 +6,8 @@ He can Bark, Run, MoveLeft, MoveRight, MoveForward, Lay and Check.
 To Run 
 he used MoveForward(2), 
 his energy decreases in 1, 
-his mood is "PLAY" and return 0.
+his mood is "PLAY",
+return 0.
 
 To MoveForward 
 he needs numbersSteps, 
@@ -14,11 +15,11 @@ his coordinatePosition[0] increases in numbersSteps,
 his mood is "MOVING", 
 his energy decreases by 1.
 
-To Move Left 
+To MoveLeft 
 he needs numbersSteps, 
 his coordinatePosition[1] decreases in numbersSteps, 
 his mood is "MOVING", 
-his energy decreases by 1
+his energy decreases by 1.
 
 To MoveRight 
 he needs numbersSteps, 

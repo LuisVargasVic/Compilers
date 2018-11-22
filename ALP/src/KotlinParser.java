@@ -7,6 +7,7 @@ public class KotlinParser {
     private List<Token> tokens;
     private int currentTokenIndex = 0;
     private Token currentToken = null;
+    private List<String> finalList = new ArrayList<>();
 
     public KotlinParser(List<Token> tokens) {
         this.tokens = tokens;
@@ -28,35 +29,41 @@ public class KotlinParser {
     private Token peekToken(int step) {
     	return tokens.get(currentTokenIndex + step);	
     }
+    
 
     public boolean ParseToKotlin() {
         parseClassDeclaration();
-        while(currentToken.type == "to" && peekToken(1) != null) {
+    	//System.out.println(currentToken.id);
+
+    	
+        while(currentToken.type.equals("to") && peekToken(1) != null) {
         	parseFunction();
+        	//System.out.println(currentToken.id + "/" + currentToken.line);
         	if(currentTokenIndex + 1 < tokens.size()) {
         		updateCurrentToken();
         	}
+        	
         	print("", true);
         }
         // TODO: Here parse class methods and check if parsing was good or not...
-        print("}", true);
+       // print("}", true);
         return true;
     }
     
     
     private boolean parseFunction() {
     		updateCurrentToken();
-	    	if (currentToken.type == "function") {
-	    		print("def " + currentToken.id, false);
+	    	if (currentToken.type == "identifier") {
+	    		finalList.add("fun"+" "+ currentToken.id);
 	    		updateCurrentToken();
 	    		if(currentToken.type == "pronoun" && peekToken(1).type == "needs") {
 	    			updateCurrentToken();
 	    			updateCurrentToken();
-	    			print("(self, "+currentToken.id+"):",false);
+	    			print("("+currentToken.id+":"+ "Any" +")"+""+"{",false);
 	    			updateCurrentToken();
 	    		}
 	    		else {
-	    			print("(self):", true );
+	    			print("()"+ "" + "{", true );
 	    		}
 	    		print("\t", false);
 	    	}
@@ -64,7 +71,7 @@ public class KotlinParser {
 	    		if(currentToken.type == "pronoun" && peekToken(1).type == "used") {
 		    		updateCurrentToken();
 		    		updateCurrentToken();
-		    		print("self."+currentToken.id, false);
+		    		print(currentToken.id, false);
 		    		updateCurrentToken();
 		    		if(currentToken.type == "opening-parenthesis") {
 		    			print(currentToken.id, false);
@@ -84,7 +91,7 @@ public class KotlinParser {
 		    	}
 	    		if(currentToken.type == "possesive") {
 		    		updateCurrentToken();
-		    		print("self.", false);
+		    		print("var"+" ", false);
 		    		do {
 		    			print(currentToken.id, false);
 		    			updateCurrentToken();
@@ -106,11 +113,14 @@ public class KotlinParser {
 		    			updateCurrentToken();
 		    		}
 		    		if(currentToken.type == "identifier") {
-		    			print("self."+currentToken.id, false);
+		    			print("var"+" "+currentToken.id, false);
 		    		}
 		    		print(" "+currentToken.id, false);
 		    		updateCurrentToken();
 		    	}
+    			//System.out.println(currentToken.id);
+	    	
+	    		
 	    		if(currentToken.type == "return") {
 	    			print("return ", false);
 	    			updateCurrentToken();
@@ -134,6 +144,8 @@ public class KotlinParser {
 	    			}
 	    		} 
 	    	}
+	    	print("\n", false);
+    		print("}", false);
 	    	print(" ", true);
 	    		return true;
     }
@@ -206,6 +218,7 @@ public class KotlinParser {
         }
 
         updateCurrentToken();
+
         return true;
     }
 }
