@@ -7,7 +7,6 @@ public class KotlinParser {
     private List<Token> tokens;
     private int currentTokenIndex = 0;
     private Token currentToken = null;
-    private List<String> finalList = new ArrayList<>();
 
     public KotlinParser(List<Token> tokens) {
         this.tokens = tokens;
@@ -52,101 +51,150 @@ public class KotlinParser {
     
     
     private boolean parseFunction() {
+    		String buffer = "";
+    	    List<String> finalList = new ArrayList<>();
+
     		updateCurrentToken();
-	    	if (currentToken.type == "identifier") {
-	    		finalList.add("fun"+" "+ currentToken.id);
+	    	if (currentToken.type.equals("identifier")) {
+	    		buffer+=("fun"+" "+ currentToken.id);
 	    		updateCurrentToken();
-	    		if(currentToken.type == "pronoun" && peekToken(1).type == "needs") {
+	    		if(currentToken.type.equals("pronoun") && peekToken(1).type.equals("needs")) {
 	    			updateCurrentToken();
 	    			updateCurrentToken();
-	    			print("("+currentToken.id+":"+ "Any" +")"+""+"{",false);
+	    			buffer+="("+currentToken.id+":"+ "Any" +")";
+	    			//finalList.add(buffer);
 	    			updateCurrentToken();
 	    		}
 	    		else {
-	    			print("()"+ "" + "{", true );
+	    			buffer+=("()"+ "" );
+	    			finalList.add(buffer);
+	    			buffer = "";
 	    		}
-	    		print("\t", false);
+	    		buffer+=("\t");
+	    		finalList.add(buffer);
+	    		buffer = "";
+	    		
 	    	}
 	    	while(currentToken.type != "end") {
-	    		if(currentToken.type == "pronoun" && peekToken(1).type == "used") {
+	    		if(currentToken.type.equals("pronoun") && peekToken(1).type.equals ("used")) {
 		    		updateCurrentToken();
 		    		updateCurrentToken();
-		    		print(currentToken.id, false);
+		    		buffer+=(currentToken.id);
 		    		updateCurrentToken();
 		    		if(currentToken.type == "opening-parenthesis") {
-		    			print(currentToken.id, false);
+		    			buffer+=(currentToken.id);
 		    			updateCurrentToken();
 		    			while(currentToken.type != "closing-parenthesis") {
-		    				print(currentToken.id, false);
+		    				buffer+=(currentToken.id);
 		    				updateCurrentToken();
 		    			}
-		    			print(currentToken.id, false);
+		    			buffer+=(currentToken.id);
 		    			updateCurrentToken();
 		    		}
+	    			finalList.add(buffer);
+	    			buffer="";
+
 		    	}
-	    		if(currentToken.type == "coma") {
-		    		print("", true);
-		    		print("\t", false);
+	    		if(currentToken.type.equals( "coma")) {
+		    		buffer=("");
+		    		buffer+=("\t");
+	    			finalList.add(buffer);
 		    		updateCurrentToken();
+		    		buffer = "";
 		    	}
-	    		if(currentToken.type == "possesive") {
+	    		if(currentToken.type.equals( "possesive")) {
 		    		updateCurrentToken();
-		    		print("var"+" ", false);
+		    		//buffer+=("var"+" ");
 		    		do {
-		    			print(currentToken.id, false);
+		    			buffer+=(currentToken.id);
 		    			updateCurrentToken();
 		    		} while(currentToken.type != "is" && currentToken.type != "res" && currentToken.type != "sum" );
-		    		if(currentToken.type == "res") {
-		    			print(" -", false);
+		    		if(currentToken.type.equals( "res")) {
+		    			buffer+=("-");
 		    			updateCurrentToken();
 		    		}
-		    		if(currentToken.type == "sum") {
-		    			print(" +", false);
+		    		if(currentToken.type.equals( "sum")) {
+		    			buffer+=("+");
 		    			updateCurrentToken();
 		    		}
-		    		if(currentToken.type == "by" || currentToken.type == "is") {
-		    			print(" =", false);
+		    		if(currentToken.type.equals( "by")) {
+		    			buffer+=(" =");
 		    			updateCurrentToken();
 		    		}
-		    		if(currentToken.type == "in") {
-		    			print("=", false);
+		    		if(currentToken.type.equals("is")){
+		    			buffer+=(" =");
+		    			buffer = "var " + buffer; 
 		    			updateCurrentToken();
 		    		}
-		    		if(currentToken.type == "identifier") {
-		    			print("var"+" "+currentToken.id, false);
+		    		if(currentToken.type.equals("in")) {
+		    			buffer+=("=");
+		    			updateCurrentToken();
 		    		}
-		    		print(" "+currentToken.id, false);
+		    		if(currentToken.type.equals("identifier")) {
+		    			buffer+=("var"+" "+currentToken.id);
+
+		    		}
+		    		buffer+=(" "+currentToken.id);
+	    			finalList.add(buffer);
 		    		updateCurrentToken();
+		    		buffer = "";
 		    	}
+	    		
     			//System.out.println(currentToken.id);
 	    	
+	    		if(currentToken.type.equals("end")) {
+					finalList.set(0, finalList.get(0) + "{");
+	    		}
 	    		
-	    		if(currentToken.type == "return") {
-	    			print("return ", false);
+	    		if(currentToken.type.equals( "return")) {
+	    			buffer+=("return ");
 	    			updateCurrentToken();
 	    			if(currentToken.type != "end") {
-	    				print(currentToken.id, false);
+	    				buffer+=(currentToken.id);
+	    				if(currentToken.type.equals("string")) {
+	    					finalList.set(0, finalList.get(0) + ": String" + "{");
+	    				}else if(currentToken.type.equals("integer")){
+	    					finalList.set(0, finalList.get(0) + ": Int" + "{");
+	    				}
 	    				updateCurrentToken();
 	    			}
+	    			finalList.add(buffer);
+	    			buffer = "";
+	    			
+
 	    		}
-	    		if(currentToken.type == "pronoun") {
+	    		
+	    		
+	    		if(currentToken.type.equals( "pronoun")) {
 	    			updateCurrentToken();
-	    			if(currentToken.type =="print" && peekToken(1).type == "opening-parenthesis") {
+	    			if(currentToken.type.equals("print") && peekToken(1).type.equals( "opening-parenthesis")) {
 	    				updateCurrentToken();
-	    				print("print(", false);
+	    				buffer+=("print(");
+		    			//finalList.add(buffer);
 	    				updateCurrentToken();
 	    				do {
-	    					print(currentToken.id, false);
+	    					buffer+=(currentToken.id);
 	    					updateCurrentToken();
 	    				} while(currentToken.type != "closing-parenthesis");
-	    				print(currentToken.id, false);
+	    				buffer+=(currentToken.id);
+	    		    	//System.out.print(buffer);
 	    				updateCurrentToken();
 	    			}
+
 	    		} 
+    			finalList.add(buffer);
+    			buffer = "";
+
 	    	}
-	    	print("\n", false);
-    		print("}", false);
-	    	print(" ", true);
+	    	buffer+=("\n");
+    		buffer+=("}");
+			finalList.add(buffer);
+	    	buffer=(" ");
+	    	
+	    	for(int i=0; i < finalList.size(); i++) {
+	    		System.out.println(finalList.get(i));
+	    		
+	    	}
 	    		return true;
     }
 
