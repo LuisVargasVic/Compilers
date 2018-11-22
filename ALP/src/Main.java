@@ -25,7 +25,7 @@ public class Main {
         	if (!LexiconAnalysis.ids.isEmpty()) { lexicon.printTokenTable(); }
         	SyntacticAnalysis syntactic = new SyntacticAnalysis();
         	SyntacticAnalysis.tokens = LexiconAnalysis.tokens;
-        	if (syntactic.syntacticAnalysis()) {
+        	if (!syntactic.syntacticAnalysis()) {
         		// PARSE
 				System.out.print("-------------------- Starting Parsing -----------------------------\n\n");
 				KotlinParser parser = new KotlinParser(SyntacticAnalysis.tokens);

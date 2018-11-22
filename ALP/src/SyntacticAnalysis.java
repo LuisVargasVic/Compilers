@@ -74,7 +74,7 @@ public class SyntacticAnalysis {
     		CLASS._class = CLEND;
     		CLEND.end = G_FUNC;
     		
-    		G_FUNC.pronoun = POS_CAN; G_FUNC.to = FUNC;
+    		G_FUNC.pronoun = POS_CAN; G_FUNC.to = FUNC; G_FUNC.init = CLN;
     		POS_CAN.has = GVAR; POS_CAN.can = CFUNC;
     		GVAR.id = GEQUAL;
     		GEQUAL.is = GTYPE;
