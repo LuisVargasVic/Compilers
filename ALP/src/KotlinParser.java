@@ -53,7 +53,7 @@ public class KotlinParser {
     	while (currentToken.id.equals("A")) {
 			parseClassDeclaration();
 
-			print("\n\n", false);
+			print("\n", false);
 
 			while(currentToken.type.equals("to")/* && peekToken(1) != null*/) {
 				if (!parseFunction()) {
@@ -87,7 +87,7 @@ public class KotlinParser {
     
     
     private boolean parseFunction() {
-    		String buffer = "";
+    		String buffer = "\t";
     	    List<String> finalList = new ArrayList<>();
 
     		updateCurrentToken();
@@ -113,7 +113,7 @@ public class KotlinParser {
 	    		}
 	    		//buffer+=("\t");
 	    		finalList.add(buffer);
-	    		buffer = "";
+	    		buffer = "\t\t";
 	    		
 	    	}
 	    	while(currentToken.type != "end") {
@@ -133,7 +133,7 @@ public class KotlinParser {
 		    			updateCurrentToken();
 		    		}
 	    			finalList.add(buffer);
-	    			buffer="";
+	    			buffer="\t\t";
 
 		    	}
 	    		if(currentToken.type.equals( "coma")) {
@@ -141,16 +141,20 @@ public class KotlinParser {
 		    		buffer+=("\t");
 	    			finalList.add(buffer);
 		    		updateCurrentToken();
-		    		buffer = "";
+	    			buffer="\t\t";
 		    	}
 	    		if(currentToken.type.equals( "possesive")) {
-	    			if (!attributesForClass.contains(peekToken(1).id)) {
+	    			String attributeName = "";
+	    			if (!attributesForClass.contains(peekToken(1).id) && peekToken(2).type != "is") {
 						System.out.println("Global Attribute " + peekToken(1).id + " is not declared in class.");
 						return false;
 					}
+	    		
 
 		    		updateCurrentToken();
-		    		//buffer+=("var"+" ");
+		    		
+		    		attributeName = currentToken.id;
+		    		
 		    		do {
 		    			buffer+=(currentToken.id);
 		    			updateCurrentToken();
@@ -164,12 +168,17 @@ public class KotlinParser {
 		    			updateCurrentToken();
 		    		}
 		    		if(currentToken.type.equals( "by")) {
-		    			buffer+=(" =");
+		    			buffer+=("=");
 		    			updateCurrentToken();
 		    		}
 		    		if(currentToken.type.equals("is")){
 		    			buffer+=(" =");
-		    			buffer = "var " + buffer; 
+		    			String buf = "";
+		    			buf = buffer.substring(2);
+		    			if (attributesForClass.contains(attributeName))
+		    				buffer = "\t\t" + buf; 
+		    			else 
+		    				buffer = "\t\tvar " + buf; 
 		    			updateCurrentToken();
 		    		}
 		    		if(currentToken.type.equals("in")) {
@@ -241,7 +250,7 @@ public class KotlinParser {
 
 	    	}
 	    	//buffer+=("\n");
-    		buffer+=("}");
+    		buffer+=("\t}");
 			finalList.add(buffer);
 	    	buffer=(" ");
 	    	

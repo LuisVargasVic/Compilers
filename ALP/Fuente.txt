@@ -5,6 +5,7 @@ He can Run, MoveLeft, MoveRight and MoveForward.
 
 To Run
 he used MoveForward(2),
+his hair is "black",
 his energy decreases by 1,
 his mood is "PLAY",
 return 0.
@@ -26,6 +27,10 @@ he needs numbersSteps,
 his coordinatePosition[1] increases in energy,
 his mood is "MOVING",
 his energy decreases by 1.
+
+To Bark
+he needs voice,
+return "Loud".
 
 A cat is Class.
 He has mood is "HAPPY", energy is 100, coordenatePosition is (100,"hola").
