@@ -1,0 +1,146 @@
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+public class KotlinParser {
+
+    private List<Token> tokens;
+    private int currentTokenIndex = 0;
+    private Token currentToken = null;
+
+    public KotlinParser(List<Token> tokens) {
+        this.tokens = tokens;
+
+        currentToken = tokens.get(currentTokenIndex);
+    }
+
+    private void print(String text, boolean jumpLine) {
+        if (jumpLine)
+            System.out.println(text);
+        else
+            System.out.print(text);
+    }
+
+    private void updateCurrentToken() {
+        currentTokenIndex++;
+        currentToken = tokens.get(currentTokenIndex);
+    }
+
+    private Token peekToken(int step) {
+        return tokens.get(currentTokenIndex + step);
+    }
+
+    public boolean ParseToKotlin() {
+    		print("holis", true);
+        parseClassDeclaration();
+        //parseFunction();
+
+
+        // TODO: Here parse class methods and check if parsing was good or not...
+
+
+        print("}", true);
+        return true;
+    }
+    
+    /*
+    private boolean parseFunction() {
+    		String code = "";
+    		/*
+    		while(currentToken.type == "createFunction") {
+    			print("def  " + currentToken.id, false);
+	    		updateCurrentToken();
+	    		if(currentToken.type == "pronoun" && peekToken(1).type == "needs") {
+	    			updateCurrentToken();
+	    			print("(self, "+currentToken.id+");", true );
+	    			
+	    		}
+	    		else {
+	    			updateCurrentToken();
+	    			print("(self);", true );
+	    		}
+	    	}
+    		return true;
+    		
+	    	if (currentToken.type == "createFunction") {
+	    		print("def  " + currentToken.id, false);
+	    		updateCurrentToken();
+	    		if(currentToken.type == "pronoun" && peekToken(1).type == "needs") {
+	    			updateCurrentToken();
+	    			print("(self, "+currentToken.id+");", true );
+	    			
+	    		}
+	    		else {
+	    			print("(self);", true );
+	    		}
+	    	}
+	    		return true;
+    }*/
+
+    private boolean parseClassDeclaration() {
+        print(currentToken.id + " - " + peekToken(1).type, true);
+        if (currentToken.id.equals("A") && peekToken(1).type.equals("class")) {
+            updateCurrentToken();
+            print("public class " + currentToken.id + " {", true);
+        }
+        else
+            return false;
+
+        while (!currentToken.id.contains("He") && !currentToken.id.contains("She") && !currentToken.id.contains("To")) {
+            updateCurrentToken();
+        }
+
+        if (currentToken.id.equals("To")) { 
+	        	//updateCurrentToken();
+	    		//parseFunction();
+	    		return true;
+        	}
+
+        // TODO: Check attributes
+        if (peekToken(1).id.contains("has")) {
+            updateCurrentToken();
+            while (!currentToken.id.contains(".")) {
+                updateCurrentToken();
+                String attributeName = currentToken.id;
+                String attributeType = currentToken.type;
+
+                updateCurrentToken();
+                updateCurrentToken();
+
+                StringBuilder attributeVal = new StringBuilder();
+                if (attributeType.contains("pairID")) {
+                    while (!currentToken.id.contains(")")) {
+                        attributeVal.append(currentToken.id);
+                        updateCurrentToken();
+                    }
+                    attributeVal.append(")");
+                }
+                else {
+                    attributeVal = new StringBuilder(currentToken.id);
+                }
+
+                print("     " + attributeType + " " + attributeName + " = " + attributeVal, true);
+                updateCurrentToken();
+            }
+
+            updateCurrentToken();
+        }
+
+        print(currentToken.id, true);
+        if (peekToken(1).id.contains("can")) {
+            updateCurrentToken();
+            HashSet<String> methods = new HashSet<>();
+            while (!currentToken.id.equals(".")) {
+                updateCurrentToken();
+
+                String methodName = currentToken.id;
+                methods.add(methodName);
+
+                updateCurrentToken();
+            }
+        }
+
+        updateCurrentToken();
+        return true;
+    }
+}

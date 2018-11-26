@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
     	LexiconAnalysis lexicon = new LexiconAnalysis();
 		String str = "";
-    	str = lexicon.readFile("Archivo_Fuente.txt");
+    	str = lexicon.readFile("Fuente.txt");
     	/** Make lexicon analysis */
     	lexicon.lexiconAnalysis(str);
         /**
@@ -25,7 +25,17 @@ public class Main {
         	if (!LexiconAnalysis.ids.isEmpty()) { lexicon.printTokenTable(); }
         	SyntacticAnalysis syntactic = new SyntacticAnalysis();
         	SyntacticAnalysis.tokens = LexiconAnalysis.tokens;
-        	syntactic.syntacticAnalysis(); 
+        	if (!syntactic.syntacticAnalysis()) {
+        		// PARSE
+				System.out.print("-------------------- Starting Parsing -----------------------------\n\n");
+				KotlinParser parser = new KotlinParser(SyntacticAnalysis.tokens);
+				parser.ParseToKotlin();
+				
+			}
+			else {
+				// TODO: DO NOT PARSE
+				System.out.println("hi");
+			}
         	
         }   	
         
